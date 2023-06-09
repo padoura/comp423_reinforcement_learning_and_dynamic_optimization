@@ -19,7 +19,7 @@ class Judger:
         high_card_ranks = []
         # If every player folds except one, the alive player is the winner
         for idx, player in enumerate(players):
-            high_card_ranks.append(Judger.rank2int(player.hand[0].rank))
+            high_card_ranks.append(player.hand[0].rank_to_index())
             if player.status == 'folded':
                fold_count += 1
             else:
@@ -38,7 +38,7 @@ class Judger:
             one_pair_ranks = [0] * len(players)
             for idx, player in enumerate(players):
                 if player.hand[0].rank == public_cards[0].rank or player.hand[0].rank == public_cards[1].rank:
-                    one_pair_ranks[idx] = Judger.rank2int(player.hand[0].rank)
+                    one_pair_ranks[idx] = player.hand[0].rank_to_index()
             if one_pair_ranks[0] != one_pair_ranks[1]:
                 max_rank = max(one_pair_ranks)
                 max_index = [i for i, j in enumerate(one_pair_ranks) if j == max_rank]
@@ -68,36 +68,3 @@ class Judger:
                 payoffs.append(float(-players[i].in_chips))
 
         return payoffs
-    
-    @staticmethod
-    def rank2int(rank):
-        ''' Get the coresponding number of a rank.
-
-        Args:
-            rank(str): rank stored in Card object
-
-        Returns:
-            (int): the number corresponding to the rank
-
-        Note:
-            1. If the input rank is an empty string, the function will return -1.
-            2. If the input rank is not valid, the function will return None.
-        '''
-        if rank == '':
-            return -1
-        elif rank.isdigit():
-            if int(rank) >= 2 and int(rank) <= 10:
-                return int(rank)
-            else:
-                return None
-        elif rank == 'A':
-            return 14
-        elif rank == 'T':
-            return 10
-        elif rank == 'J':
-            return 11
-        elif rank == 'Q':
-            return 12
-        elif rank == 'K':
-            return 13
-        return None
