@@ -1,33 +1,32 @@
 from card import Card
 
 
-class HumanAgent:
-    ''' A human agent adapted from rlcard library. It can be used to play against trained models
+class RandomAgent:
+    ''' A random agent for benchmarking purposes
     '''
 
-    def __init__(self, num_actions):
-        ''' Initilize the human agent
+    def __init__(self, num_actions, np_random):
+        ''' Initilize the random agent
 
         Args:
             num_actions (int): the size of the ouput action space
         '''
+        self.np_random = np_random
         self.use_raw = True
         self.num_actions = num_actions
 
     def step(self, state):
-        ''' Human agent will display the state and make decisions through interfaces
+        ''' Completely random agent
 
         Args:
             state (dict): A dictionary that represents the current state
 
         Returns:
-            action (int): The action decided by human
+            action (int): The randomly chosen action
         '''
         self._print_state(state['raw_obs'], state['action_record'])
-        action = int(input('>> You (Player {}) choose action (integer): '.format(state['raw_obs']['current_player'])))
-        while action < 0 or action >= len(state['legal_actions']):
-            print('Action illegal...')
-            action = int(input('>> Re-choose action (integer): '))
+
+        action = self.np_random.randint(0, len(state['raw_legal_actions']))
         return state['raw_legal_actions'][action]
 
     def eval_step(self, state):
@@ -51,16 +50,16 @@ class HumanAgent:
         if len(action_record) > 0:
             print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
-        print('\n=============== Community Card ===============')
-        Card.print_card(state['public_cards'])
-        print('===============   Your Hand    ===============')
-        Card.print_card(state['hand'])
+        # print('\n=============== Community Card ===============')
+        # Card.print_card(state['public_cards'])
+        # print('===============   Your Hand    ===============')
+        # Card.print_card(state['hand'])
         print('===============     Chips      ===============')
         for i in range(len(state['all_chips'])):
             if i == state['current_player']:
-                print('Yours (Player {}): '.format(i), state['my_chips'])
+                print('Random Agent (Player {}): '.format(i), state['my_chips'])
             else:
                 print('Player {}: '.format(i) , state['all_chips'][i])
-        print('\n=========== Actions You Can Choose ===========')
+        print('\n=========== Actions Random Agent Can Choose ===========')
         print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
         print('')

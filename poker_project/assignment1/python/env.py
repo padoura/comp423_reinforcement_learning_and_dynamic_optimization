@@ -209,8 +209,8 @@ class Env(object):
         '''
         state = {}
         state['chips'] = [self.game.players[i].in_chips for i in range(self.num_players)]
-        state['public_cards'] = [self.game.public_cards[i].get_index() for i in range(self.game.public_cards)]
-        state['hand_cards'] = [self.game.players[i].hand.get_index() for i in range(self.num_players)]
+        state['public_cards'] = self.game.public_cards
+        state['hand_cards'] = [self.game.players[i].hand for i in range(self.num_players)]
         state['current_round'] = self.game.round_counter
         state['current_player'] = self.game.game_pointer
         state['legal_actions'] = self.game.round.get_legal_actions()

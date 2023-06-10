@@ -2,17 +2,19 @@
 '''
 
 from env import Env
-# from card import Card
+from card import Card
 from human_agent import HumanAgent
+from random_agent import RandomAgent
 
 # Make environment
 env = Env()
 human_agent1 = HumanAgent(env.num_actions)
-human_agent2 = HumanAgent(env.num_actions)
-# cfr_agent = models.load('leduc-holdem-cfr').agents[0]
+# human_agent2 = HumanAgent(env.num_actions)
+random_agent = RandomAgent(env.num_actions, env.np_random)
 env.set_agents([
     human_agent1,
-    human_agent2,
+    # human_agent2,
+    random_agent,
 ])
 
 print(">> Simplified Hold'em model")
@@ -28,9 +30,9 @@ while (True):
     state = final_state['raw_obs']
     print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
-    # # Let's take a look at what the agent card is
-    # print('===============     CFR Agent    ===============')
-    # Card.print_card(env.get_perfect_information()['hand_cards'][1])
+    # Let's take a look at what Player 1 card is
+    print('===============     Hand of Player 1    ===============')
+    Card.print_card(env.get_perfect_information()['hand_cards'][1])
 
     print('===============     Result     ===============')
     if payoffs[0] > 0:
