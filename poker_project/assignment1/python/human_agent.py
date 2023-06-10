@@ -1,8 +1,8 @@
 from card import Card
 
 
-class HumanAgent(object):
-    ''' A human agent for Leduc Holdem. It can be used to play against trained models
+class HumanAgent:
+    ''' A human agent adapted from rlcard library. It can be used to play against trained models
     '''
 
     def __init__(self, num_actions):
@@ -24,7 +24,7 @@ class HumanAgent(object):
         Returns:
             action (int): The action decided by human
         '''
-        _print_state(state['raw_obs'], state['action_record'])
+        HumanAgent._print_state(state['raw_obs'], state['action_record'])
         action = int(input('>> You (Player {}) choose action (integer): '.format(state['raw_obs']['current_player'])))
         while action < 0 or action >= len(state['legal_actions']):
             print('Action illegal...')
@@ -42,26 +42,27 @@ class HumanAgent(object):
         '''
         return self.step(state), {}
 
-def _print_state(state, action_record):
-    ''' Print out the state
+    @staticmethod
+    def _print_state(state, action_record):
+        ''' Print out the state
 
-    Args:
-        state (dict): A dictionary of the raw state
-        action_record (list): A list of the historical actions
-    '''
-    if len(action_record) > 0:
-        print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
+        Args:
+            state (dict): A dictionary of the raw state
+            action_record (list): A list of the historical actions
+        '''
+        if len(action_record) > 0:
+            print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
-    print('\n=============== Community Card ===============')
-    Card.print_card(state['public_cards'])
-    print('===============   Your Hand    ===============')
-    Card.print_card(state['hand'])
-    print('===============     Chips      ===============')
-    for i in range(len(state['all_chips'])):
-        if i == state['current_player']:
-            print('Yours (Player {}): '.format(i), state['my_chips'])
-        else:
-            print('Player {}: '.format(i) , state['all_chips'][i])
-    print('\n=========== Actions You Can Choose ===========')
-    print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
-    print('')
+        print('\n=============== Community Card ===============')
+        Card.print_card(state['public_cards'])
+        print('===============   Your Hand    ===============')
+        Card.print_card(state['hand'])
+        print('===============     Chips      ===============')
+        for i in range(len(state['all_chips'])):
+            if i == state['current_player']:
+                print('Yours (Player {}): '.format(i), state['my_chips'])
+            else:
+                print('Player {}: '.format(i) , state['all_chips'][i])
+        print('\n=========== Actions You Can Choose ===========')
+        print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
+        print('')
