@@ -51,7 +51,7 @@ class Card:
         '''
         return self.suit+self.rank
     
-    def rank_to_index(rank):
+    def rank_to_index(self):
         ''' Get the coresponding number of a rank.
 
         Args:
@@ -64,22 +64,22 @@ class Card:
             1. If the input rank is an empty string, the function will return -1.
             2. If the input rank is not valid, the function will return None.
         '''
-        if rank == '':
+        if self.rank == '':
             return -1
-        elif rank.isdigit():
-            if int(rank) >= 2 and int(rank) <= 10:
-                return int(rank)
+        elif self.rank.isdigit():
+            if int(self.rank) >= 2 and int(self.rank) <= 10:
+                return int(self.rank)
             else:
                 return None
-        elif rank == 'A':
+        elif self.rank == 'A':
             return 14
-        elif rank == 'T':
+        elif self.rank == 'T':
             return 10
-        elif rank == 'J':
+        elif self.rank == 'J':
             return 11
-        elif rank == 'Q':
+        elif self.rank == 'Q':
             return 12
-        elif rank == 'K':
+        elif self.rank == 'K':
             return 13
         return None
     
@@ -96,7 +96,6 @@ class Card:
             cards = [cards]
 
         lines = [[] for _ in range(9)]
-
         for card in cards:
             if card is None:
                 lines[0].append('┌─────────┐')
@@ -130,6 +129,9 @@ class Card:
                 lines[7].append('│       {}{}│'.format(space, rank))
                 lines[8].append('└─────────┘')
 
+        for line in lines:
+            print ('   '.join(line))
+
     @staticmethod
     def elegent_form(card):
         ''' Get a elegent form of a card string
@@ -141,4 +143,6 @@ class Card:
             elegent_card (string): A nice form of card
         '''
         suits = {'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣','s': '♠', 'h': '♥', 'd': '♦', 'c': '♣' }
-        rank = '10' if card[1] == 'T' else card[1]
+        rank = 'T' if card[1] == '10' else card[1]
+
+        return suits[card[0]] + rank

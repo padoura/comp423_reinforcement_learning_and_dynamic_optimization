@@ -25,7 +25,7 @@ class HumanAgent(object):
             action (int): The action decided by human
         '''
         _print_state(state['raw_obs'], state['action_record'])
-        action = int(input('>> You choose action (integer): '))
+        action = int(input('>> You (Player {}) choose action (integer): '.format(state['raw_obs']['current_player'])))
         while action < 0 or action >= len(state['legal_actions']):
             print('Action illegal...')
             action = int(input('>> Re-choose action (integer): '))
@@ -49,29 +49,19 @@ def _print_state(state, action_record):
         state (dict): A dictionary of the raw state
         action_record (list): A list of the historical actions
     '''
-    _action_list = []
-    for i in range(1, len(action_record)+1):
-        if action_record[-i][0] == state['current_player']:
-            break
-        _action_list.insert(0, action_record[-i])
-    for pair in _action_list:
-        print('>> Player', pair[0], 'chooses', pair[1])
+    if len(action_record) > 0:
+        print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
     print('\n=============== Community Card ===============')
     Card.print_card(state['public_cards'])
     print('===============   Your Hand    ===============')
     Card.print_card(state['hand'])
     print('===============     Chips      ===============')
-    print('Yours:   ', end='')
-    for _ in range(state['my_chips']):
-        print('+', end='')
-    print('')
-    print(state['all_chips']) # DEBUG
     for i in range(len(state['all_chips'])):
-        if i != state['current_player']:
-            print('Agent {}: '.format(i) , end='')
-            for _ in range(state['all_chips'][i]):
-                print('+', end='')
+        if i == state['current_player']:
+            print('Yours (Player {}): '.format(i), state['my_chips'])
+        else:
+            print('Player {}: '.format(i) , state['all_chips'][i])
     print('\n=========== Actions You Can Choose ===========')
     print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
     print('')

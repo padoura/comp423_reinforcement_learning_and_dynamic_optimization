@@ -29,8 +29,8 @@ class Player:
             (dict): The state of the player
         """
         return {
-            'hand': [c.get_index() for c in self.hand],
-            'public_cards': [c.get_index() for c in public_cards],
+            'hand': [c for c in self.hand],
+            'public_cards': [c for c in public_cards],
             'all_chips': all_chips,
             'my_chips': self.in_chips,
             'legal_actions': legal_actions

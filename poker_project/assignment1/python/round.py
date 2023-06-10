@@ -31,7 +31,7 @@ class Round:
         self.raised = [0 for _ in range(self.num_players)]
         self.player_folded = None
 
-    def start_new_round(self, game_pointer, raised=None):
+    def start_new_round(self, game_pointer, starting_game_pointer, raised=None):
         """
         Start a new bidding round
 
@@ -42,6 +42,7 @@ class Round:
         Note: For the first round of the game, we need to setup the big/small blind
         """
         self.game_pointer = game_pointer
+        self.starting_game_pointer = starting_game_pointer
         self.have_raised_num = 0
         self.not_raise_num = 0
         if raised:
@@ -109,7 +110,7 @@ class Round:
             full_actions.remove('check')
 
         # Player with big blind cannot bet unless other player bet first
-        if self.game_pointer != self.starting_game_pointer and self.raised[self.game_pointer] == max(self.raised):
+        if self.game_pointer != self.starting_game_pointer and self.raised[self.game_pointer] == max(self.raised) and self.not_raise_num != 0:
             full_actions.remove('bet')
 
         # A Player cannot fold if current chips are the highest one in the round

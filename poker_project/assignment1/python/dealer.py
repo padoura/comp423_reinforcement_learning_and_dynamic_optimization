@@ -20,7 +20,7 @@ class Dealer:
         """
         return self.deck.pop()
     
-    def init_standard_deck():
+    def init_standard_deck(self):
         ''' Initialize limited cards for assignment 1
 
         Returns:

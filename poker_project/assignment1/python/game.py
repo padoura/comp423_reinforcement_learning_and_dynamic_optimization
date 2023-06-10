@@ -56,19 +56,20 @@ class Game:
         self.players = [Player(i, self.np_random) for i in range(self.num_players)]
 
         # Initialize a judger class which will decide who wins in the end
-        self.judger = Judger(self.np_random)
+        self.judger = Judger()
 
         # Prepare for the first round
         for i in range(self.num_players):
-            self.players[i].hand[0] = self.dealer.deal_card()
+            self.players[i].hand.append(self.dealer.deal_card())
         # Randomly choose a small blind and a big blind
         s = self.np_random.randint(0, self.num_players)
         b = (s + 1) % self.num_players
         self.players[b].in_chips = self.big_blind
         self.players[s].in_chips = self.small_blind
-        self.public_cards = []
+        self.public_cards = [None, None]
         # The player with small blind plays first
         self.game_pointer = s
+        self.starting_game_pointer = s
 
         # Initilize a bidding round, in the first round, the big blind and the small blind needs to
         # be passed to the round for processing.
@@ -77,7 +78,7 @@ class Game:
                            num_players=self.num_players,
                            np_random=self.np_random)
 
-        self.round.start_new_round(game_pointer=self.game_pointer, raised=[p.in_chips for p in self.players])
+        self.round.start_new_round(game_pointer=self.game_pointer, starting_game_pointer=self.starting_game_pointer, raised=[p.in_chips for p in self.players])
 
         # Count the round. There are 2 rounds in each game.
         self.round_counter = 0
@@ -118,13 +119,14 @@ class Game:
 
         # If a round is over, we deal more public cards
         if self.round.is_over():
-            # For the first round, we deal 1 card as public card. Double the raise amount for the second round
+            # For the first round, we deal 2 cards as public cards.
             if self.round_counter == 0:
                 self.public_cards[0] = self.dealer.deal_card()
                 self.public_cards[1] = self.dealer.deal_card()
 
             self.round_counter += 1
-            self.round.start_new_round(self.game_pointer)
+            self.game_pointer = self.starting_game_pointer # unlike real heads up rules, keep player order pre-flop and post-flop the same
+            self.round.start_new_round(self.game_pointer, self.starting_game_pointer)
 
         state = self.get_state(self.game_pointer)
 

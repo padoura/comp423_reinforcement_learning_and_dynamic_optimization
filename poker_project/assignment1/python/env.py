@@ -15,7 +15,7 @@ class Env(object):
     we should base on this class and implement as many functions
     as we can.
     '''
-    def __init__(self, config):
+    def __init__(self, config = { 'allow_step_back': False, 'seed': None }):
         ''' Initialize the Limitholdem environment
         '''
         self.name = 'leduc-holdem' 
@@ -32,8 +32,8 @@ class Env(object):
         self.game.configure(_game_config)
 
         # Get the number of players/actions in this game
-        self.num_players = self.game.get_num_players()
-        self.num_actions = self.game.get_num_actions()
+        self.num_players = self.game.num_players
+        self.num_actions = self.game.num_players
 
         # A counter for the timesteps
         self.timestep = 0
@@ -179,7 +179,7 @@ class Env(object):
         Returns:
             (int): The id of the current player
         '''
-        return self.game.get_player_id()
+        return self.game.game_pointer
 
 
     def get_state(self, player_id):
@@ -255,13 +255,14 @@ class Env(object):
         extracted_state['legal_actions'] = legal_actions
 
         public_cards = state['public_cards']
-        hand = state['hand_cards']
+        hand = state['hand']
         obs = np.zeros(25)
         obs[hand[0].rank_to_index() - 10] = 1 # 0~4     | T ~ A in hand
-        for i in range(len(public_cards)):
-            obs[public_cards[i].rank_to_index() - 5*(i-1)] = 1 # 5~9     | T ~ A as first public card, 10~14   | T ~ A as second public card
+        if (public_cards[0] is not None) and (public_cards[1] is not None):
+            obs[public_cards[0].rank_to_index() - 5] = 1 # 5~9     | T ~ A as first public card
+            obs[public_cards[1].rank_to_index()] = 1 # 10~14   | T ~ A as second public card
         obs[int(state['my_chips']+14.5)] = 1 # 15~19   | 0.5:1:4.5 chips in for current player  |
-        obs[sum(state['all_chips'])-state['my_chips']+19.5] = 1 # 20~24   | 0.5:1:4.5 chips in for opponent
+        obs[int(sum(state['all_chips'])-state['my_chips']+19.5)] = 1 # 20~24   | 0.5:1:4.5 chips in for opponent
         extracted_state['obs'] = obs
 
         extracted_state['raw_obs'] = state
