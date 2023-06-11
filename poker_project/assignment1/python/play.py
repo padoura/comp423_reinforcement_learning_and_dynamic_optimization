@@ -16,8 +16,8 @@ threshold_agent = ThresholdAgent(env.num_actions)
 env.set_agents([
     human_agent1,
     # human_agent2,
-    # random_agent,
-    threshold_agent,
+    random_agent,
+    # threshold_agent,
 ])
 
 print(">> Simplified Hold'em model")

@@ -233,15 +233,15 @@ class Env(object):
         return seed
 
     def _extract_state(self, state):
-        ''' Extract the state representation from state dictionary:
+        ''' Extract the state representation for learning 'obs':
 
-        | Index   | Meaning                                |
-        | --------| :-------------------------------------:|
-        | 0~4     | T ~ A in hand                          |
-        | 5~9     | T ~ A as first public card             |
-        | 10~14   | T ~ A as second public card            |
-        | 15~19   | 0.5:1:4.5 chips in for current player  |
-        | 20~24   | 0.5:1:4.5 chips in for opponent        |
+        | Index          | Meaning                                             |
+        | ---------------| :--------------------------------------------------:|
+        | 'position'     | Position of player 'first'/'second'                 |
+        | 'hand'         | Rank of hand: T ~ A as first public card            |
+        | 'all_chips'    | Array of chips in game                              |
+        | 'public_cards' | Rank of public cards in alphabetical order e.g. 'AK'|
+        | 'is_terminal'  | Whether it is a terminal state                      |
 
         Args:
             state (dict): Original state from the game
@@ -255,14 +255,20 @@ class Env(object):
         extracted_state['legal_actions'] = legal_actions
 
         public_cards = state['public_cards']
-        hand = state['hand']
-        obs = np.zeros(25)
-        obs[hand[0].rank_to_index() - 10] = 1 # 0~4     | T ~ A in hand
+        obs = {}
+        obs['position'] = state['position']
+        obs['hand'] = state['hand'][0].rank
+        obs['all_chips'] = state['all_chips']
+        # obs[hand[0].rank_to_index() - 10] = 1 # 0~4     | T ~ A in hand
         if (public_cards[0] is not None) and (public_cards[1] is not None):
-            obs[public_cards[0].rank_to_index() - 5] = 1 # 5~9     | T ~ A as first public card
-            obs[public_cards[1].rank_to_index()] = 1 # 10~14   | T ~ A as second public card
-        obs[int(state['my_chips']+14.5)] = 1 # 15~19   | 0.5:1:4.5 chips in for current player  |
-        obs[int(sum(state['all_chips'])-state['my_chips']+19.5)] = 1 # 20~24   | 0.5:1:4.5 chips in for opponent
+            obs['public_cards'] = ''.join(sorted(public_cards[0].rank + public_cards[1].rank))
+        else:
+            obs['public_cards'] = ''
+        obs['is_terminal'] = self.game.is_over()
+            # obs[public_cards[0].rank_to_index() - 5] = 1 # 5~9     | T ~ A as first public card
+            # obs[public_cards[1].rank_to_index()] = 1 # 10~14   | T ~ A as second public card
+        # obs[int(state['my_chips']+14.5)] = 1 # 15~19   | 0.5:1:4.5 chips in for current player  |
+        # obs[int(sum(state['all_chips'])-state['my_chips']+19.5)] = 1 # 20~24   | 0.5:1:4.5 chips in for opponent
         extracted_state['obs'] = obs
 
         extracted_state['raw_obs'] = state
