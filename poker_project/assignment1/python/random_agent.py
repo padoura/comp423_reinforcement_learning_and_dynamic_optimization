@@ -63,3 +63,19 @@ class RandomAgent:
         print('\n=========== Actions Random Agent Can Choose ===========')
         print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
         print('')
+
+    def get_transition_probabilities_for_actions(self, state):
+        ''' Return state transition probabilities due to known random opponent
+
+        Args:
+            state (dict): A dictionary that represents the current state
+
+        Returns:
+            action_probabilities (dictionary): Probabilities for each action to be selected
+        '''
+        self._print_state(state['raw_obs'], state['action_record'])
+        action_probabilities = {}
+        for action in state['raw_legal_actions']:
+            action_probabilities[action] = 1 / len(state['raw_legal_actions'])
+            
+        return action_probabilities
