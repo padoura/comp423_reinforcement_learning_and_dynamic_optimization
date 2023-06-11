@@ -61,7 +61,9 @@ class Game:
         # Randomly choose a small blind and a big blind
         s = self.np_random.randint(0, self.num_players)
         b = (s + 1) % self.num_players
+        self.players[b].position = 'second'
         self.players[b].in_chips = self.big_blind
+        self.players[s].position = 'first'
         self.players[s].in_chips = self.small_blind
         self.public_cards = [None, None]
         # The player with small blind plays first
@@ -165,10 +167,10 @@ class Game:
         ''' Return the payoffs of the game
 
         Returns:
-            (list): Each entry corresponds to the payoff of one player, returned values normalized by big blind
+            (list): Each entry corresponds to the payoff of one player
         '''
         chips_payoffs = Judger.judge_game(self.players, self.public_cards)
-        payoffs = np.array(chips_payoffs) / (self.big_blind)
+        payoffs = chips_payoffs
         return payoffs
 
     def step_back(self):

@@ -12,6 +12,7 @@ class Player:
         self.player_id = player_id
         self.hand = []
         self.status = 'alive'
+        self.position = None
 
         # The chips that this player has put in until now
         self.in_chips = 0
@@ -32,7 +33,8 @@ class Player:
             'public_cards': [c for c in public_cards],
             'all_chips': all_chips,
             'my_chips': self.in_chips,
-            'legal_actions': legal_actions
+            'legal_actions': legal_actions,
+            'position': self.position
         }
 
     def get_player_id(self):
