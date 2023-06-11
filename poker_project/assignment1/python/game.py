@@ -192,13 +192,14 @@ class Game:
         To be used for state transitions of value/policy iteration algorithms
 
         Returns:
-           [ win_frequencies, tie_frequencies ] (2 dictionaries): Frequencies of all combinations of 1 hand + 2 public cards or 'tie' if it's a guarranteed tie
+           [ win_frequencies, tie_frequencies, loss_frequencies, total_frequencies ] (dictionaries): Frequencies for all combinations of 1 hand + 2 public cards
         '''
 
         deck = Dealer.init_standard_deck()
         win_frequencies = {}
         tie_frequencies = {}
         loss_frequencies = {}
+        total_frequencies = {}
         
         my_player = Player(0)
         my_player.in_chips = 0.5
@@ -220,11 +221,13 @@ class Game:
                                 tie_frequencies[key] = 0
                                 win_frequencies[key] = 0
                                 loss_frequencies[key] = 0
+                                total_frequencies[key] = 0
                             for opposing_hand_idx, opposing_hand in enumerate(deck):
                                 if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
                                     opposing_player.hand = [opposing_hand]
                                     players = [ my_player, opposing_player ]
                                     payoffs = Judger.judge_game(players, public_hands)
+                                    total_frequencies[key] += 1
                                     if payoffs[0] == 0.5:
                                         win_frequencies[key] += 1
                                     elif payoffs[0] == 0:
@@ -233,4 +236,4 @@ class Game:
                                         loss_frequencies[key] += 1
         
 
-        return [ win_frequencies, tie_frequencies, loss_frequencies ]
+        return [ win_frequencies, tie_frequencies, loss_frequencies, total_frequencies ]
