@@ -211,11 +211,9 @@ class Game:
             my_player.hand = [my_hand]
             for public_card1_idx, public_card1 in enumerate(deck):
                 if my_hand_idx != public_card1_idx:
-                    public_hands = []
-                    public_hands.append(public_card1)
                     for public_card2_idx, public_card2 in enumerate(deck):
                         if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
-                            public_hands.append(public_card2)
+                            public_hands = [ public_card1, public_card2 ]
                             key = my_hand.rank + ''.join(sorted(public_card1.rank + public_card2.rank))
                             if key not in tie_frequencies:
                                 tie_frequencies[key] = 0
@@ -228,6 +226,8 @@ class Game:
                                     players = [ my_player, opposing_player ]
                                     payoffs = Judger.judge_game(players, public_hands)
                                     total_frequencies[key] += 1
+                                    # if key == 'QJQ': # DEBUG
+                                    #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
                                     if payoffs[0] == 0.5:
                                         win_frequencies[key] += 1
                                     elif payoffs[0] == 0:
