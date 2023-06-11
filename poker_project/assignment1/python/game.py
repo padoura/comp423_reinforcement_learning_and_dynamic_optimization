@@ -187,19 +187,24 @@ class Game:
         return False
     
     @staticmethod
-    def get_winning_frequency_if_cards_shown():
-        ''' Calculates frequency of winning and tieing after (final) round 2 (flop) if 'fold' is not a possible action
+    def get_transition_probabilities_for_cards():
+        ''' Calculates transition probabilities for pre- and post-flop state of cards
         To be used for state transitions of value/policy iteration algorithms
 
         Returns:
-           [ win_frequencies, tie_frequencies, loss_frequencies, total_frequencies ] (dictionaries): Frequencies for all combinations of 1 hand + 2 public cards
+           [ win_probabilities, loss_probabilities, flop_probabilities ] (dictionaries): Transition probabilities for pre- and post-flop state of cards
         '''
 
         deck = Dealer.init_standard_deck()
         win_frequencies = {}
+        win_probabilities = {}
         tie_frequencies = {}
         loss_frequencies = {}
-        total_frequencies = {}
+        loss_probabilities = {}
+        total_opposing_frequencies = {}
+
+        flop_frequencies = {}
+        flop_probabilities = {}
         
         my_player = Player(0)
         my_player.in_chips = 0.5
@@ -209,6 +214,8 @@ class Game:
 
         for my_hand_idx, my_hand in enumerate(deck):
             my_player.hand = [my_hand]
+            if my_hand.rank not in flop_frequencies:
+                flop_frequencies[my_hand.rank] = {}
             for public_card1_idx, public_card1 in enumerate(deck):
                 if my_hand_idx != public_card1_idx:
                     for public_card2_idx, public_card2 in enumerate(deck):
@@ -219,13 +226,16 @@ class Game:
                                 tie_frequencies[key] = 0
                                 win_frequencies[key] = 0
                                 loss_frequencies[key] = 0
-                                total_frequencies[key] = 0
+                                total_opposing_frequencies[key] = 0
+                            if key not in flop_frequencies[my_hand.rank]:
+                                flop_frequencies[my_hand.rank][key] = 0
+                            flop_frequencies[my_hand.rank][key] += 1
                             for opposing_hand_idx, opposing_hand in enumerate(deck):
                                 if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
                                     opposing_player.hand = [opposing_hand]
                                     players = [ my_player, opposing_player ]
                                     payoffs = Judger.judge_game(players, public_hands)
-                                    total_frequencies[key] += 1
+                                    total_opposing_frequencies[key] += 1
                                     # if key == 'QJQ': # DEBUG
                                     #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
                                     if payoffs[0] == 0.5:
@@ -235,5 +245,13 @@ class Game:
                                     else:
                                         loss_frequencies[key] += 1
         
+        for key in total_opposing_frequencies:
+            win_probabilities[key] = win_frequencies[key] / total_opposing_frequencies[key]
+            loss_probabilities[key] = loss_frequencies[key] / total_opposing_frequencies[key]
 
-        return [ win_frequencies, tie_frequencies, loss_frequencies, total_frequencies ]
+        for key in flop_frequencies:
+            flop_probabilities[key] = {}
+            for public_key in flop_frequencies[key]:
+                flop_probabilities[key][public_key] = flop_frequencies[key][public_key] / sum(flop_frequencies[key].values())
+
+        return [ win_probabilities, loss_probabilities, flop_probabilities ]
