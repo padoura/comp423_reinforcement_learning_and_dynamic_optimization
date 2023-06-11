@@ -1,20 +1,23 @@
-''' A toy example of playing against pretrianed AI on Leduc Hold'em
+''' A toy example of playing simplified heads up limit hold'em
 '''
 
 from env import Env
 from card import Card
 from human_agent import HumanAgent
 from random_agent import RandomAgent
+from threshold_agent import ThresholdAgent
 
 # Make environment
 env = Env()
 human_agent1 = HumanAgent(env.num_actions)
 # human_agent2 = HumanAgent(env.num_actions)
 random_agent = RandomAgent(env.num_actions, env.np_random)
+threshold_agent = ThresholdAgent(env.num_actions)
 env.set_agents([
     human_agent1,
     # human_agent2,
-    random_agent,
+    # random_agent,
+    threshold_agent,
 ])
 
 print(">> Simplified Hold'em model")
