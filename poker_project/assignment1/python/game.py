@@ -53,10 +53,7 @@ class Game:
         self.dealer = Dealer(self.np_random)
 
         # Initilize two players to play the game
-        self.players = [Player(i, self.np_random) for i in range(self.num_players)]
-
-        # Initialize a judger class which will decide who wins in the end
-        self.judger = Judger()
+        self.players = [Player(i) for i in range(self.num_players)]
 
         # Prepare for the first round
         for i in range(self.num_players):
@@ -170,7 +167,7 @@ class Game:
         Returns:
             (list): Each entry corresponds to the payoff of one player, returned values normalized by big blind
         '''
-        chips_payoffs = self.judger.judge_game(self.players, self.public_cards)
+        chips_payoffs = Judger.judge_game(self.players, self.public_cards)
         payoffs = np.array(chips_payoffs) / (self.big_blind)
         return payoffs
 
@@ -188,3 +185,52 @@ class Game:
                 self.players[i].hand = hand
             return True
         return False
+    
+    @staticmethod
+    def get_winning_frequency_if_cards_shown():
+        ''' Calculates frequency of winning and tieing after (final) round 2 (flop) if 'fold' is not a possible action
+        To be used for state transitions of value/policy iteration algorithms
+
+        Returns:
+           [ win_frequencies, tie_frequencies ] (2 dictionaries): Frequencies of all combinations of 1 hand + 2 public cards or 'tie' if it's a guarranteed tie
+        '''
+
+        deck = Dealer.init_standard_deck()
+        win_frequencies = {}
+        tie_frequencies = {}
+        loss_frequencies = {}
+        
+        my_player = Player(0)
+        my_player.in_chips = 0.5
+        opposing_player = Player(1)
+        opposing_player.in_chips = 0.5
+        # num_of_possible_opposing =  (len(deck) - 3) # 3 cards known, the rest are possible opposing_hands remaining
+
+        for my_hand_idx, my_hand in enumerate(deck):
+            my_player.hand = [my_hand]
+            for public_card1_idx, public_card1 in enumerate(deck):
+                if my_hand_idx != public_card1_idx:
+                    public_hands = []
+                    public_hands.append(public_card1)
+                    for public_card2_idx, public_card2 in enumerate(deck):
+                        if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
+                            public_hands.append(public_card2)
+                            key = my_hand.get_index() + public_card1.get_index() + public_card2.get_index()
+                            tie_frequencies[key] = 0
+                            win_frequencies[key] = 0
+                            loss_frequencies[key] = 0
+                            for opposing_hand_idx, opposing_hand in enumerate(deck):
+                                if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
+                                    opposing_player.hand = [opposing_hand]
+                                    players = [ my_player, opposing_player ]
+                                    payoffs = Judger.judge_game(players, public_hands)
+                                    if payoffs[0] == 0.5:
+                                        win_frequencies[key] += 1
+                                    elif payoffs[0] == 0:
+                                        key = my_hand.get_index() + public_card1.get_index() + public_card2.get_index()
+                                        tie_frequencies[key] += 1
+                                    else:
+                                        loss_frequencies[key] += 1
+        
+
+        return [ win_frequencies, tie_frequencies, loss_frequencies ]

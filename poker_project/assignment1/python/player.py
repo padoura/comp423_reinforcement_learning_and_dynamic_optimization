@@ -2,14 +2,13 @@
 '''
 class Player:
 
-    def __init__(self, player_id, np_random):
+    def __init__(self, player_id):
         """
         Initialize a player.
 
         Args:
             player_id (int): The id of the player
         """
-        self.np_random = np_random
         self.player_id = player_id
         self.hand = []
         self.status = 'alive'
