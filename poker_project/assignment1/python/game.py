@@ -215,10 +215,11 @@ class Game:
                     for public_card2_idx, public_card2 in enumerate(deck):
                         if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
                             public_hands.append(public_card2)
-                            key = my_hand.get_index() + public_card1.get_index() + public_card2.get_index()
-                            tie_frequencies[key] = 0
-                            win_frequencies[key] = 0
-                            loss_frequencies[key] = 0
+                            key = my_hand.rank + ''.join(sorted(public_card1.rank + public_card2.rank))
+                            if key not in tie_frequencies:
+                                tie_frequencies[key] = 0
+                                win_frequencies[key] = 0
+                                loss_frequencies[key] = 0
                             for opposing_hand_idx, opposing_hand in enumerate(deck):
                                 if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
                                     opposing_player.hand = [opposing_hand]
@@ -227,7 +228,6 @@ class Game:
                                     if payoffs[0] == 0.5:
                                         win_frequencies[key] += 1
                                     elif payoffs[0] == 0:
-                                        key = my_hand.get_index() + public_card1.get_index() + public_card2.get_index()
                                         tie_frequencies[key] += 1
                                     else:
                                         loss_frequencies[key] += 1
