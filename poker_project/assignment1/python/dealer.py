@@ -4,7 +4,7 @@ from card import Card
 class Dealer:
     def __init__(self, np_random):
         self.np_random = np_random
-        self.deck = self.init_standard_deck()
+        self.deck = Dealer.init_standard_deck()
         self.shuffle()
         self.pot = 0
 
@@ -20,7 +20,8 @@ class Dealer:
         """
         return self.deck.pop()
     
-    def init_standard_deck(self):
+    @staticmethod
+    def init_standard_deck():
         ''' Initialize limited cards for assignment 1
 
         Returns:
