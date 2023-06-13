@@ -7,7 +7,7 @@ class Round:
 
     FULL_ACTIONS = ['bet', 'raise', 'fold', 'check']
 
-    def __init__(self, raise_amount, allowed_raise_num, num_players, np_random):
+    def __init__(self, raise_amount, allowed_raise_num, num_players):
         """
         Initialize the round class
 
@@ -16,7 +16,6 @@ class Round:
             allowed_raise_num (int): The number of allowed raise num
             starting_game_pointer (int): retains player with small blind
         """
-        self.np_random = np_random
         self.game_pointer = None
         self.starting_game_pointer = None
         self.raise_amount = raise_amount
@@ -114,7 +113,7 @@ class Round:
         if self.raised[self.game_pointer] < max(self.raised):
             full_actions.remove('check')
 
-        # Player with big blind cannot bet unless other player bet first
+        # Player with big blind cannot bet unless other player raises first
         if self.game_pointer != self.starting_game_pointer and self.raised[self.game_pointer] == max(self.raised) and self.not_raise_num != 0:
             full_actions.remove('bet')
 

@@ -74,8 +74,7 @@ class Game:
         # be passed to the round for processing.
         self.round = Round(raise_amount=self.raise_amount,
                            allowed_raise_num=self.allowed_raise_num,
-                           num_players=self.num_players,
-                           np_random=self.np_random)
+                           num_players=self.num_players)
 
         self.round.start_new_round(game_pointer=self.game_pointer, starting_game_pointer=self.starting_game_pointer, raised=[p.in_chips for p in self.players])
 
