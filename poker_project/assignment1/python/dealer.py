@@ -2,6 +2,10 @@ from card import Card
 ''' Dealer class adapted from rlcard
 '''
 class Dealer:
+
+    SUIT_LIST = ['S', 'H', 'D', 'C']
+    RANK_LIST = ['A', 'T', 'J', 'Q', 'K']
+
     def __init__(self, np_random):
         self.np_random = np_random
         self.deck = Dealer.init_standard_deck()
@@ -27,7 +31,5 @@ class Dealer:
         Returns:
             (list): A list of Card object
         '''
-        suit_list = ['S', 'H', 'D', 'C']
-        rank_list = ['A', 'T', 'J', 'Q', 'K']
-        res = [Card(suit, rank) for suit in suit_list for rank in rank_list]
+        res = [Card(suit, rank) for suit in Dealer.SUIT_LIST for rank in Dealer.RANK_LIST]
         return res
