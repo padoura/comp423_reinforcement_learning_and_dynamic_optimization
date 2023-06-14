@@ -187,6 +187,17 @@ class RandomAgent:
             for my_action in ['fold', 'bet']:
                 RandomAgent.add_or_update_key(game_tree, position, my_chips, other_chips, my_action)
 
+        ############## position == 'second' #################
+        position = 'second'
+        # preflop @ chips [0.5, 0.5]
+        my_chips = 0.5
+        other_chips = 0
+        for my_action in ['raise', 'check']:
+            RandomAgent.add_or_update_key(game_tree, position, my_chips, other_chips, my_action)
+        # preflop @ chips [1.5, 0.5]
+        other_chips = 1
+        for my_action in ['raise', 'bet', 'fold']:
+            RandomAgent.add_or_update_key(game_tree, position, my_chips, other_chips, my_action)
 
         return game_tree
     
@@ -196,53 +207,60 @@ class RandomAgent:
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + my_action + '_' + hand
             if key not in game_tree: game_tree[key] = []
-            if (position == 'first' and other_chips == 0 and my_action == 'bet'):
-                new_my_chips = my_chips + 1
-                action_prob = 1/3 # random selection between 'fold', 'raise', 'bet'
+            if (position == 'first' and other_chips == 0 and my_action == 'bet') or (position == 'second' and my_action == 'raise'):
+                new_my_chips = my_chips + 1 + other_chips
+                action_prob = 1/3 if position == 'first' else 1/2 # first position -> 'fold', 'raise', 'bet', second position -> 'fold', 'bet'
                 #### other_action == 'fold' ####
                 is_terminal = True
                 new_other_chips = -1
-                reward = my_chips
+                reward = my_chips + other_chips
                 game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
+                ### TODO: Loop here for all public cards
                 game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
-                #### other_action == 'raise' ####
-                is_terminal = False
-                new_other_chips = 1
-                reward = 0
-                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
-            elif (position == 'first' and other_chips == 1 and my_action == 'bet'):
+                if position == 'first':
+                    #### other_action == 'raise' ####
+                    is_terminal = False
+                    new_other_chips = 1
+                    reward = 0
+                    game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+            elif (other_chips == 1 and my_action == 'bet'):
                 new_my_chips = my_chips + 1
-                action_prob = 1 # random agent has finished his move
+                action_prob = 1 # random agent has finished his move by raising
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
+                ### TODO: Loop here for all public cards
                 game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
-            elif (position == 'first' and my_action == 'fold'):
+            elif (my_action == 'fold'):
                 new_my_chips = my_chips
-                action_prob = 1 # random agent has finished his move
+                action_prob = 1 # random agent has finished his move by raising
                 is_terminal = True
                 new_other_chips = 1
                 reward = -my_chips
                 game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
-            elif (position == 'first' and my_action == 'check'):
+            elif (my_action == 'check'):
                 new_my_chips = my_chips
-                action_prob = 0.5 # random selection between 'check', 'raise'
+                action_prob = 0.5 if position == 'first' else 1 # first position -> randomly between 'check', 'raise', second position -> round done
                 #### other_action == 'check' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
+                ### TODO: Loop here for all public cards
                 game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
-                #### other_action == 'raise' ####
-                is_terminal = False
-                new_other_chips = 1
-                reward = 0
-                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+                if position == 'first':
+                    #### other_action == 'raise' ####
+                    is_terminal = False
+                    new_other_chips = 1
+                    reward = 0
+                    game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
 
+# result = RandomAgent.calculate_game_tree()
+# print(len(result))
 # import json
 
 # with open("game_tree.json", "w") as write_file:
-#     json.dump(RandomAgent.calculate_game_tree(), write_file, indent=4, sort_keys=True)
+#     json.dump(result, write_file, indent=4, sort_keys=True)
