@@ -1,7 +1,11 @@
 ''' Round class adapted from rlcard
 '''
+
+from copy import copy
 class Round:
     """Round can call other Classes' functions to keep the game running"""
+
+    FULL_ACTIONS = ['bet', 'raise', 'fold', 'check']
 
     def __init__(self, raise_amount, allowed_raise_num, num_players, np_random):
         """
@@ -98,14 +102,15 @@ class Round:
         Returns:
            (list):  A list of legal actions
         """
-        full_actions = ['bet', 'raise', 'fold', 'check']
+
+        full_actions = copy(Round.FULL_ACTIONS)
 
         # If the number of raises already reaches the maximum number raises, we can not raise any more
         # Moreover, player with small blind cannot raise
         if self.game_pointer == self.starting_game_pointer or self.have_raised_num >= self.allowed_raise_num:
             full_actions.remove('raise')
 
-        # If the current chips are less than that of the highest one in the round, we can not check
+        # If the current chips are less than that of the highest one in the round, we cannot check
         if self.raised[self.game_pointer] < max(self.raised):
             full_actions.remove('check')
 
