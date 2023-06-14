@@ -193,53 +193,54 @@ class RandomAgent:
 
     @staticmethod
     def add_or_update_key(game_tree, position, my_chips, other_chips, my_action):
-        key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + my_action
-        if key not in game_tree: game_tree[key] = []
-        if (position == 'first' and other_chips == 0 and my_action == 'bet'):
-            new_my_chips = my_chips + 1
-            prob = 1/3 # random selection between 'fold', 'raise', 'bet'
-            #### other_action == 'fold' ####
-            is_terminal = True
-            new_other_chips = -1
-            reward = my_chips
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-            #### other_action == 'bet' ####
-            is_terminal = False
-            new_other_chips = 0
-            reward = 0
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-            #### other_action == 'raise' ####
-            is_terminal = False
-            new_other_chips = 1
-            reward = 0
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-        elif (position == 'first' and other_chips == 1 and my_action == 'bet'):
-            new_my_chips = my_chips + 1
-            prob = 1 # random agent has finished his move
-            is_terminal = False
-            new_other_chips = 0
-            reward = 0
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-        elif (position == 'first' and my_action == 'fold'):
-            new_my_chips = my_chips
-            prob = 1 # random agent has finished his move
-            is_terminal = True
-            new_other_chips = 1
-            reward = -my_chips
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-        elif (position == 'first' and my_action == 'check'):
-            new_my_chips = my_chips
-            prob = 0.5 # random selection between 'check', 'raise'
-            #### other_action == 'check' ####
-            is_terminal = False
-            new_other_chips = 0
-            reward = 0
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
-            #### other_action == 'raise' ####
-            is_terminal = False
-            new_other_chips = 1
-            reward = 0
-            game_tree[key].append( (prob, position, new_my_chips, new_other_chips, is_terminal, reward, 0, 0)  )
+        for hand in Dealer.RANK_LIST:
+            key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + my_action + '_' + hand
+            if key not in game_tree: game_tree[key] = []
+            if (position == 'first' and other_chips == 0 and my_action == 'bet'):
+                new_my_chips = my_chips + 1
+                action_prob = 1/3 # random selection between 'fold', 'raise', 'bet'
+                #### other_action == 'fold' ####
+                is_terminal = True
+                new_other_chips = -1
+                reward = my_chips
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+                #### other_action == 'bet' ####
+                is_terminal = False
+                new_other_chips = 0
+                reward = 0
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+                #### other_action == 'raise' ####
+                is_terminal = False
+                new_other_chips = 1
+                reward = 0
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+            elif (position == 'first' and other_chips == 1 and my_action == 'bet'):
+                new_my_chips = my_chips + 1
+                action_prob = 1 # random agent has finished his move
+                is_terminal = False
+                new_other_chips = 0
+                reward = 0
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+            elif (position == 'first' and my_action == 'fold'):
+                new_my_chips = my_chips
+                action_prob = 1 # random agent has finished his move
+                is_terminal = True
+                new_other_chips = 1
+                reward = -my_chips
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+            elif (position == 'first' and my_action == 'check'):
+                new_my_chips = my_chips
+                action_prob = 0.5 # random selection between 'check', 'raise'
+                #### other_action == 'check' ####
+                is_terminal = False
+                new_other_chips = 0
+                reward = 0
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
+                #### other_action == 'raise' ####
+                is_terminal = False
+                new_other_chips = 1
+                reward = 0
+                game_tree[key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, 0)  )
 
 # import json
 
