@@ -4,6 +4,7 @@
 from env import Env
 from card import Card
 from human_agent import HumanAgent
+from policy_iteration import PolicyIterationAgent
 from random_agent import RandomAgent
 from threshold_agent import ThresholdAgent
 
@@ -13,11 +14,13 @@ human_agent1 = HumanAgent(env.num_actions)
 # human_agent2 = HumanAgent(env.num_actions)
 random_agent = RandomAgent(env.num_actions, env.np_random)
 threshold_agent = ThresholdAgent(env.num_actions)
+pi_random_agent = PolicyIterationAgent(env.np_random, random_agent)
 env.set_agents([
     human_agent1,
     # human_agent2,
-    random_agent,
+    # random_agent,
     # threshold_agent,
+    pi_random_agent,
 ])
 
 print(">> Simplified Hold'em model")
