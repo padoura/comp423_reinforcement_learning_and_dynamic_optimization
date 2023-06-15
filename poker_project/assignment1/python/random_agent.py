@@ -176,33 +176,36 @@ class RandomAgent:
         game_tree = {}
         [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
 
+        ############## position == 'first' #################
+        # preflop @ chips [0.5, 0.5]
+        # flop @ chips [0.5, 0.5], [1.5, 1.5], [2.5, 2.5]
+        # my_legal_actions = ['bet', 'check']
+        ############## position == 'second' #################
+        # preflop @ chips [0.5, 0.5]
+        # flop @ chips [0.5, 0.5]
+        # my_legal_actions = ['raise', 'check']
+        ############## position == 'first' #################
+        # preflop @ chips [0.5, 1.5] or [1.5, 2.5]
+        # flop @ chips [0.5, 1.5] or [1.5, 2.5] or [2.5, 3.5] or [3.5, 4.5]
+        # my_legal_actions = ['fold', 'bet']
+        ############## position == 'second' #################
+        # preflop @ chips [1.5, 0.5]
+        # flop @ chips [1.5, 0.5], [2.5, 1.5], [3.5, 2.5]
+        # my_legal_actions = ['raise', 'bet', 'fold']
         for position in ['first', 'second']:
             for game_round in [1, 2]:
-                ############## position == 'first' #################
-                # preflop @ chips [0.5, 0.5]
-                # flop @ chips [0.5, 0.5], [1.5, 1.5], [2.5, 2.5]
-                ############## position == 'second' #################
-                # preflop @ chips [0.5, 0.5]
-                # flop @ chips [0.5, 0.5]
-                other_chips = 0
-                my_starting_chips = [0.5, 1.5, 2.5] if game_round == 2 else [0.5]
-                my_legal_actions = ['bet', 'check'] if position == 'first' else ['raise', 'check']
-                for my_chips in my_starting_chips:
-                    for my_action in my_legal_actions:
-                        RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
-                ############## position == 'first' #################
-                # preflop @ chips [0.5, 1.5] or [1.5, 2.5]
-                # flop @ chips [0.5, 1.5] or [1.5, 2.5] or [2.5, 3.5] or [3.5, 4.5]
-                 ############## position == 'second' #################
-                # preflop @ chips [1.5, 0.5]
-                # flop @ chips [1.5, 0.5], [2.5, 1.5], [3.5, 2.5]
-                other_chips = 1
-                if position == 'first': 
-                    my_starting_chips = [0.5, 1.5, 2.5, 3.5] if game_round == 2 else [0.5, 1.5]
-                my_legal_actions = ['fold', 'bet'] if position == 'first' else ['raise', 'bet', 'fold']
-                for my_chips in my_starting_chips:
-                    for my_action in my_legal_actions:
-                        RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)          
+                for other_chips in [0, 1]:
+                    if position == 'first' and other_chips == 1: 
+                        my_starting_chips = [0.5, 1.5, 2.5, 3.5] if game_round == 2 else [0.5, 1.5]
+                    else:
+                        my_starting_chips = [0.5, 1.5, 2.5] if game_round == 2 else [0.5]
+                    if other_chips == 0:
+                        my_legal_actions = ['bet', 'check'] if position == 'first' else ['raise', 'check']
+                    else: # other_chips = 1
+                        my_legal_actions = ['fold', 'bet'] if position == 'first' else ['raise', 'bet', 'fold']
+                    for my_chips in my_starting_chips:
+                        for my_action in my_legal_actions:
+                            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
         return game_tree
     
