@@ -260,7 +260,7 @@ class Env(object):
         obs['position'] = state['position']
         obs['hand'] = state['hand'][0].rank
         obs['my_chips'] = state['my_chips']
-        obs['other_chips'] = sum(state['all_chips'])-state['my_chips']
+        obs['other_chips'] = int(sum(state['all_chips'])-2*state['my_chips'])
         if (public_cards[0] is not None) and (public_cards[1] is not None):
             obs['public_cards'] = ''.join(sorted(public_cards[0].rank + public_cards[1].rank))
         else:
