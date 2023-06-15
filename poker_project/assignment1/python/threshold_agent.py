@@ -78,7 +78,7 @@ class ThresholdAgent:
         else:
             if 'check' in state['raw_legal_actions']:
                 action = 'check'
-            elif state['raw_obs']['hand'][0].rank_to_index() == 12:
+            elif state['raw_obs']['hand'][0].rank_to_index() > 10:
                 action = 'bet'
             else:
                 action = 'fold'
@@ -105,7 +105,9 @@ class ThresholdAgent:
         else:
             if 'check' in state['raw_legal_actions']:
                 action = 'check'
-            else:
+            elif state['raw_obs']['hand'][0].rank_to_index() < 12:
                 action = 'fold'
+            else:
+                action = 'bet'
 
         return action
