@@ -166,46 +166,74 @@ class RandomAgent:
 
         # positions = {'first', 'second'}
         # chips = {'0.5', '1.5', '2.5', '3.5', '4.5'}
-        public_cards_set = {'none'}
-        for public_card1 in Dealer.RANK_LIST:
-            for public_hand2 in Dealer.RANK_LIST:
-                public_cards_set.add(''.join(sorted(public_card1 + public_hand2)))
+        # public_cards_set = {'none'}
+        # for public_card1 in Dealer.RANK_LIST:
+        #     for public_hand2 in Dealer.RANK_LIST:
+        #         public_cards_set.add(''.join(sorted(public_card1 + public_hand2)))
 
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         game_tree = {}
         [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
 
-        ############## position == 'first' #################
+        ############## position == 'first', round 1 #################
         position = 'first'
+        game_round = 1
         # preflop @ chips [0.5, 0.5]
         my_chips = 0.5
         other_chips = 0
         for my_action in ['bet', 'check']:
-            RandomAgent.calculate_preflop_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities)
-        # preflop @ chips [0.5, 1.5] or [1.5, 2.5] or [2.5, 3.5] or [3.5, 4.5]
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+        # preflop @ chips [0.5, 1.5] or [1.5, 2.5]
         other_chips = 1
         for my_chips in [0.5, 1.5]:
             for my_action in ['fold', 'bet']:
-                RandomAgent.calculate_preflop_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
-        ############## position == 'second' #################
+        ############## position == 'second', round 1 #################
         position = 'second'
         # preflop @ chips [0.5, 0.5]
         my_chips = 0.5
         other_chips = 0
         for my_action in ['raise', 'check']:
-            RandomAgent.calculate_preflop_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities)
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
         # preflop @ chips [1.5, 0.5]
         other_chips = 1
         for my_action in ['raise', 'bet', 'fold']:
-            RandomAgent.calculate_preflop_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities)
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+
+
+        ############## position == 'first', round 2 #################
+        position = 'first'
+        game_round = 2
+        # preflop @ chips [0.5, 0.5]
+        my_chips = 0.5
+        other_chips = 0
+        for my_action in ['bet', 'check']:
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+        # preflop @ chips [0.5, 1.5] or [1.5, 2.5]
+        other_chips = 1
+        for my_chips in [0.5, 1.5]:
+            for my_action in ['fold', 'bet']:
+                RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+
+        ############## position == 'second', round 2 #################
+        position = 'second'
+        # preflop @ chips [0.5, 0.5]
+        my_chips = 0.5
+        other_chips = 0
+        for my_action in ['raise', 'check']:
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+        # preflop @ chips [1.5, 0.5]
+        other_chips = 1
+        for my_action in ['raise', 'bet', 'fold']:
+            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)            
 
         return game_tree
     
 
     @staticmethod
-    def calculate_preflop_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities):
+    def calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + my_action + '_' + hand + '_' + 'none'
             if (position == 'first' and other_chips == 0 and my_action == 'bet') or (position == 'second' and my_action == 'raise'):
@@ -215,34 +243,32 @@ class RandomAgent:
                 is_terminal = True
                 new_other_chips = -1
                 reward = my_chips + other_chips
-                RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                ### TODO: Loop here for all public cards
-                RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 if position == 'first':
                     #### other_action == 'raise' ####
                     is_terminal = False
                     new_other_chips = 1
                     reward = 0
-                    RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                    RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (other_chips == 1 and my_action == 'bet'):
                 new_my_chips = my_chips + 1
                 action_prob = 1 # random agent has finished his move by raising
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                ### TODO: Loop here for all public cards
-                RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (my_action == 'fold'):
                 new_my_chips = my_chips
                 action_prob = 1 # random agent has finished his move by raising
                 is_terminal = True
                 new_other_chips = 1
                 reward = -my_chips
-                RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (my_action == 'check'):
                 new_my_chips = my_chips
                 action_prob = 0.5 if position == 'first' else 1 # first position -> randomly between 'check', 'raise', second position -> round done
@@ -250,17 +276,24 @@ class RandomAgent:
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                ### TODO: Loop here for all public cards
-                RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 if position == 'first':
                     #### other_action == 'raise' ####
                     is_terminal = False
                     new_other_chips = 1
                     reward = 0
-                    RandomAgent.calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities)
+                    RandomAgent.calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
     @staticmethod
-    def calculate_flop_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities):
+    def calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
+        if game_round == 1: # end of round 1
+            RandomAgent.calculate_public_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, flop_probabilities)
+        else: # end of round 2
+            RandomAgent.calculate_winning_hand_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities)
+
+            
+    @staticmethod
+    def calculate_public_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, flop_probabilities):
         if is_terminal:
             public_cards = 'none'
             if key not in game_tree: game_tree[key] = []
@@ -271,6 +304,9 @@ class RandomAgent:
                 game_tree[key].append( (flop_probabilities[hand][public_cards]*action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
 
 
+    @staticmethod
+    def calculate_winning_hand_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities):
+        pass # TODO
 
 # [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
 
