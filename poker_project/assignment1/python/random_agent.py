@@ -119,10 +119,10 @@ class RandomAgent:
                             public_hands = [ public_card1, public_card2 ]
                             key = ''.join(sorted(public_card1.rank + public_card2.rank))
                             if key not in tie_frequencies:
-                                tie_frequencies[key] = 0
-                                win_frequencies[key] = 0
-                                loss_frequencies[key] = 0
-                                total_opposing_frequencies[key] = 0
+                                tie_frequencies[my_hand.rank+key] = 0
+                                win_frequencies[my_hand.rank+key] = 0
+                                loss_frequencies[my_hand.rank+key] = 0
+                                total_opposing_frequencies[my_hand.rank+key] = 0
                             if key not in flop_frequencies[my_hand.rank]:
                                 flop_frequencies[my_hand.rank][key] = 0
                             flop_frequencies[my_hand.rank][key] += 1
@@ -131,15 +131,15 @@ class RandomAgent:
                                     opposing_player.hand = [opposing_hand]
                                     players = [ my_player, opposing_player ]
                                     payoffs = Judger.judge_game(players, public_hands)
-                                    total_opposing_frequencies[key] += 1
+                                    total_opposing_frequencies[my_hand.rank+key] += 1
                                     # if key == 'QJQ': # DEBUG
                                     #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
                                     if payoffs[0] == 0.5:
-                                        win_frequencies[key] += 1
+                                        win_frequencies[my_hand.rank+key] += 1
                                     elif payoffs[0] == 0:
-                                        tie_frequencies[key] += 1
+                                        tie_frequencies[my_hand.rank+key] += 1
                                     else:
-                                        loss_frequencies[key] += 1
+                                        loss_frequencies[my_hand.rank+key] += 1
         
         for key in total_opposing_frequencies:
             win_probabilities[key] = win_frequencies[key] / total_opposing_frequencies[key]
@@ -288,8 +288,8 @@ class RandomAgent:
 
 # import json
 # [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
-# with open("flop_probabilities.json", "w") as write_file:
-#     json.dump(flop_probabilities, write_file, indent=4, sort_keys=True)
+# with open("win_probabilities.json", "w") as write_file:
+#     json.dump(win_probabilities, write_file, indent=4, sort_keys=True)
 
 # import json
 # game_tree = RandomAgent.calculate_game_tree()
