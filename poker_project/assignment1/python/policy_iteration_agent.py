@@ -4,11 +4,10 @@ class PolicyIterationAgent:
     ''' An agent following the optimal policy returned by Policy Iteration algorithm
     '''
 
-
-    def __init__(self, np_random, opponent):
+    def __init__(self, np_random, print_enabled, opponent):
         self.np_random = np_random
         self.state_space = opponent.calculate_game_tree()
-        self.t = 0
+        self.print_enabled = print_enabled
         self.use_raw = True
         self.V_opt,self.P_opt = self.policy_iteration(self.state_space)
 
@@ -21,7 +20,7 @@ class PolicyIterationAgent:
         Returns:
             action (int): the optimal action
         '''
-        self._print_state(state['raw_obs'], state['action_record'])
+        if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
         state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards']
         action = self.P_opt[state_key]
         return action
@@ -62,7 +61,7 @@ class PolicyIterationAgent:
         print('')
 
     def policy_evaluation(self, pi, P, gamma = 1.0, epsilon = 1e-10):  #inputs: (1) policy to be evaluated, (2) model of the environment (transition probabilities, etc., see previous cell), (3) discount factor (with default = 1), (4) convergence error (default = 10^{-10})
-        t = 0   #there's more elegant ways to do this
+        # t = 0   #there's more elegant ways to do this
         prev_V = dict.fromkeys(P.keys(),0) # use as "cost-to-go", i.e. for V(s')
         while True:
             V = dict.fromkeys(P.keys(),0) # current value function to be learnerd
@@ -75,7 +74,7 @@ class PolicyIterationAgent:
             if np.max([np.abs(prev_V[s] - V[s]) for s in V.keys()]) < epsilon: #check if the new V estimate is close enough to the previous one; 
                 break # if yes, finish loop
             prev_V = V.copy() #freeze the new values (to be used as the next V(s'))
-            t += 1
+            # t += 1
             # Vplot[:,t] = prev_V  # accounting for GUI  
         return V
 

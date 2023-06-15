@@ -12,15 +12,15 @@ from threshold_agent import ThresholdAgent
 env = Env()
 human_agent1 = HumanAgent(env.num_actions)
 # human_agent2 = HumanAgent(env.num_actions)
-random_agent = RandomAgent(env.num_actions, env.np_random)
-threshold_agent = ThresholdAgent(env.num_actions)
-pi_random_agent = PolicyIterationAgent(env.np_random, random_agent)
+random_agent = RandomAgent(env.np_random, True)
+threshold_agent = ThresholdAgent(True)
+pi_random_agent = PolicyIterationAgent(env.np_random, True, random_agent)
 env.set_agents([
-    human_agent1,
+    # human_agent1,
     # human_agent2,
-    # random_agent,
     # threshold_agent,
     pi_random_agent,
+    random_agent,
 ])
 
 print(">> Simplified Hold'em model")

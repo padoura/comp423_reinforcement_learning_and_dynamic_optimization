@@ -5,14 +5,11 @@ class ThresholdAgent:
     ''' Threshold ("static") agent for benchmarking purposes
     '''
 
-    def __init__(self, num_actions):
-        ''' Initilize the random agent
-
-        Args:
-            num_actions (int): the size of the ouput action space
+    def __init__(self, print_enabled):
+        ''' Initilize the agent
         '''
         self.use_raw = True
-        self.num_actions = num_actions
+        self.print_enabled = print_enabled
 
     def step(self, state):
         ''' Threshold ("static") agent
@@ -23,7 +20,7 @@ class ThresholdAgent:
         Returns:
             action (str): The rule-based chosen action
         '''
-        self._print_state(state['raw_obs'], state['action_record'])
+        if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
 
         is_round_1 = (state['raw_obs']['public_cards'][0] is None) and (state['raw_obs']['public_cards'][1] is None)
 

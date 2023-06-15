@@ -6,7 +6,7 @@ class RandomAgent:
     ''' A random agent for benchmarking purposes
     '''
 
-    def __init__(self, num_actions, np_random):
+    def __init__(self, np_random, print_enabled):
         ''' Initilize the random agent
 
         Args:
@@ -14,7 +14,7 @@ class RandomAgent:
         '''
         self.np_random = np_random
         self.use_raw = True
-        self.num_actions = num_actions # TODO: obsolete, to be deleted
+        self.print_enabled = print_enabled # TODO: obsolete, to be deleted
 
     def step(self, state):
         ''' Completely random agent
@@ -25,7 +25,7 @@ class RandomAgent:
         Returns:
             action (int): The randomly chosen action
         '''
-        self._print_state(state['raw_obs'], state['action_record'])
+        if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
 
         action = self.np_random.randint(0, len(state['raw_legal_actions']))
         return state['raw_legal_actions'][action]
