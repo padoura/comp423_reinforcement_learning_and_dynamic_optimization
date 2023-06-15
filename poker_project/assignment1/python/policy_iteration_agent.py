@@ -6,7 +6,7 @@ class PolicyIterationAgent:
 
     def __init__(self, np_random, print_enabled, opponent):
         self.np_random = np_random
-        self.state_space = opponent.calculate_game_tree()
+        self.state_space = opponent.calculate_state_space()
         self.print_enabled = print_enabled
         self.use_raw = True
         self.V_opt,self.P_opt = self.policy_iteration(self.state_space)
