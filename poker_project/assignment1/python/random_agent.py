@@ -265,19 +265,19 @@ class RandomAgent:
     @staticmethod
     def calculate_cards_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         if game_round == 1: # end of round 1
-            new_key = key + 'none'
+            full_key = key + 'none'
             if is_terminal:
                 public_cards = 'none'
-                if new_key not in game_tree: game_tree[new_key] = []
-                game_tree[new_key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
+                if full_key not in game_tree: game_tree[full_key] = []
+                game_tree[full_key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
             else:
                 for public_cards in flop_probabilities[hand]:
-                    if new_key not in game_tree: game_tree[new_key] = []
-                    game_tree[new_key].append( (flop_probabilities[hand][public_cards]*action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
+                    if full_key not in game_tree: game_tree[full_key] = []
+                    game_tree[full_key].append( (flop_probabilities[hand][public_cards]*action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
         else: # end of round 2
             for public_cards in flop_probabilities[hand]:
-                new_key = key + public_cards
-                if new_key not in game_tree: game_tree[new_key] = []
+                full_key = key + public_cards
+                if full_key not in game_tree: game_tree[full_key] = []
                 if new_other_chips == 0:
                     # game finished, result based on players' hands 
                     is_terminal = True
@@ -286,9 +286,9 @@ class RandomAgent:
                     tie_prob = 1 - win_prob - loss_prob
                     for result_prob in [win_prob, loss_prob, tie_prob]:
                         reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
-                        game_tree[new_key].append( (result_prob*action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
+                        game_tree[full_key].append( (result_prob*action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
                 else:
-                    game_tree[new_key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
+                    game_tree[full_key].append( (action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)  )
 
 # import json
 # [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
