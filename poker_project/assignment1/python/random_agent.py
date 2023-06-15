@@ -206,28 +206,29 @@ class RandomAgent:
         ############## position == 'first', round 2 #################
         position = 'first'
         game_round = 2
-        # preflop @ chips [0.5, 0.5]
-        my_chips = 0.5
+        # flop @ chips [0.5, 0.5], [1.5, 1.5], [2.5, 2.5]
         other_chips = 0
-        for my_action in ['bet', 'check']:
-            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
-        # preflop @ chips [0.5, 1.5] or [1.5, 2.5]
+        for my_chips in [0.5, 1.5, 2.5]:
+            for my_action in ['bet', 'check']:
+                RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+        # flop @ chips [0.5, 1.5] or [1.5, 2.5] or [2.5, 3.5] or [3.5, 4.5]
         other_chips = 1
-        for my_chips in [0.5, 1.5]:
+        for my_chips in [0.5, 1.5, 2.5, 3.5]:
             for my_action in ['fold', 'bet']:
                 RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
         ############## position == 'second', round 2 #################
         position = 'second'
-        # preflop @ chips [0.5, 0.5]
-        my_chips = 0.5
+        # flop @ chips [0.5, 0.5]
         other_chips = 0
-        for my_action in ['raise', 'check']:
-            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
-        # preflop @ chips [1.5, 0.5]
+        for my_chips in [0.5, 1.5, 2.5]:
+            for my_action in ['raise', 'check']:
+                RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+        # flop @ chips [1.5, 0.5], [2.5, 1.5], [3.5, 2.5]
         other_chips = 1
-        for my_action in ['raise', 'bet', 'fold']:
-            RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)            
+        for my_chips in [0.5, 1.5, 2.5]:
+            for my_action in ['raise', 'bet', 'fold']:
+                RandomAgent.calculate_round_tree(game_tree, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)            
 
         return game_tree
     
@@ -308,16 +309,13 @@ class RandomAgent:
     def calculate_winning_hand_tree(game_tree, key, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities):
         pass # TODO
 
+# import json
+
 # [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
+# with open("flop_probabilities.json", "w") as write_file:
+#     json.dump(flop_probabilities, write_file, indent=4, sort_keys=True)
 
 # game_tree = RandomAgent.calculate_game_tree()
 # print(len(game_tree))
-
-
-# import json
 # with open("game_tree.json", "w") as write_file:
 #     json.dump(game_tree, write_file, indent=4, sort_keys=True)
-
-# import json
-# with open("flop_probabilities.json", "w") as write_file:
-#     json.dump(flop_probabilities, write_file, indent=4, sort_keys=True)
