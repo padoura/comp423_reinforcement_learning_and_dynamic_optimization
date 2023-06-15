@@ -4,7 +4,7 @@
 from env import Env
 from card import Card
 from human_agent import HumanAgent
-from policy_iteration import PolicyIterationAgent
+from policy_iteration_agent import PolicyIterationAgent
 from random_agent import RandomAgent
 from threshold_agent import ThresholdAgent
 
