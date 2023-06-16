@@ -1,4 +1,6 @@
-from card import Card
+from dealer import Dealer
+from player import Player
+from judger import Judger
 
 
 class ThresholdAgent:
@@ -67,8 +69,8 @@ class ThresholdAgent:
 
     def _choose_action_round_1(self, state):
         '''Maximum bet/raise with K or A
-        Check/bet with Q
-        Check/fold with 10 or J
+        Check/bet with Q or J
+        Check/fold with 10
         '''
         if state['raw_obs']['hand'][0].rank_to_index() >= 13:
             if 'raise' in state['raw_legal_actions']:
@@ -87,7 +89,8 @@ class ThresholdAgent:
     
     def _choose_action_round_2(self, state):
         '''Maximum bet/raise with at least a pair
-        Check/fold without
+        Check/bet with A, K, Q
+        Check/fold with J, T
         '''
 
         has_at_least_a_pair = (
@@ -111,3 +114,19 @@ class ThresholdAgent:
                 action = 'bet'
 
         return action
+    
+    @staticmethod
+    def infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards):
+        # Ignoring fold and final bet of the game since after these actions it is over
+        if game_round == 1:
+            if action == 'raise' or (other_chips == 0 and action == 'bet'):
+                current_range.remove(card for card in ['T', 'J', 'Q'])
+            elif action == 'bet':
+                current_range.remove(card for card in ['T', 'K', 'A'])
+            else:
+                current_range.remove(card for card in ['K', 'A'])
+        else:
+            if action == 'raise' or (other_chips == 0 and action == 'bet'):
+                current_range = [public_cards[0], public_cards[1]]
+            else:
+                current_range.remove(card for card in [public_cards[0], public_cards[1]])
