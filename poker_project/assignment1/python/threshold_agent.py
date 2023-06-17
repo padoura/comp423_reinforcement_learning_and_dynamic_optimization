@@ -160,36 +160,42 @@ class ThresholdAgent:
 
         for my_hand_idx, my_hand in enumerate(deck):
             my_player.hand = [my_hand]
-            if my_hand.rank not in flop_frequencies:
-                flop_frequencies[my_hand.rank] = {}
-            for public_card1_idx, public_card1 in enumerate(deck):
-                if my_hand_idx != public_card1_idx:
-                    for public_card2_idx, public_card2 in enumerate(deck):
-                        if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
-                            public_hands = [ public_card1, public_card2 ]
-                            key = ''.join(sorted(public_card1.rank + public_card2.rank))
-                            if key not in tie_frequencies:
-                                tie_frequencies[my_hand.rank+key] = 0
-                                win_frequencies[my_hand.rank+key] = 0
-                                loss_frequencies[my_hand.rank+key] = 0
-                                total_opposing_frequencies[my_hand.rank+key] = 0
-                            if key not in flop_frequencies[my_hand.rank]:
-                                flop_frequencies[my_hand.rank][key] = 0
-                            flop_frequencies[my_hand.rank][key] += 1
-                            for opposing_hand_idx, opposing_hand in enumerate(deck):
-                                if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
-                                    opposing_player.hand = [opposing_hand]
-                                    players = [ my_player, opposing_player ]
-                                    payoffs = Judger.judge_game(players, public_hands)
-                                    total_opposing_frequencies[my_hand.rank+key] += 1
-                                    # if key == 'QJQ': # DEBUG
-                                    #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
-                                    if payoffs[0] == 0.5:
-                                        win_frequencies[my_hand.rank+key] += 1
-                                    elif payoffs[0] == 0:
-                                        tie_frequencies[my_hand.rank+key] += 1
-                                    else:
-                                        loss_frequencies[my_hand.rank+key] += 1
+            flop_frequencies[my_hand.rank] = {}
+            for preflop_opponent_range in ['AK', 'JQ', 'JQT']:
+                if preflop_opponent_range not in flop_frequencies:
+                    flop_frequencies[my_hand.rank][preflop_opponent_range] = {}
+                    for opponent_hand in preflop_opponent_range:
+                        possibly_removed_cards = list(filter(lambda card: card.rank == opponent_hand, deck))
+                        for removed_card in possibly_removed_cards:
+                            remaining_deck = list(filter(lambda card: card != removed_card, deck))
+                            for public_card1_idx, public_card1 in enumerate(remaining_deck):
+                                if my_hand_idx != public_card1_idx:
+                                    for public_card2_idx, public_card2 in enumerate(remaining_deck):
+                                        if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
+                                            public_hands = [ public_card1, public_card2 ]
+                                            key = ''.join(sorted(public_card1.rank + public_card2.rank))
+                                            if key not in tie_frequencies:
+                                                tie_frequencies[my_hand.rank+key] = 0
+                                                win_frequencies[my_hand.rank+key] = 0
+                                                loss_frequencies[my_hand.rank+key] = 0
+                                                total_opposing_frequencies[my_hand.rank+key] = 0
+                                            if key not in flop_frequencies[my_hand.rank][preflop_opponent_range]:
+                                                flop_frequencies[my_hand.rank][preflop_opponent_range][key] = 0
+                                            flop_frequencies[my_hand.rank][preflop_opponent_range][key] += 1
+                                            for opposing_hand_idx, opposing_hand in enumerate(deck):
+                                                if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
+                                                    opposing_player.hand = [opposing_hand]
+                                                    players = [ my_player, opposing_player ]
+                                                    payoffs = Judger.judge_game(players, public_hands)
+                                                    total_opposing_frequencies[my_hand.rank+key] += 1
+                                                    # if key == 'QJQ': # DEBUG
+                                                    #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
+                                                    if payoffs[0] == 0.5:
+                                                        win_frequencies[my_hand.rank+key] += 1
+                                                    elif payoffs[0] == 0:
+                                                        tie_frequencies[my_hand.rank+key] += 1
+                                                    else:
+                                                        loss_frequencies[my_hand.rank+key] += 1
         
         for key in total_opposing_frequencies:
             win_probabilities[key] = win_frequencies[key] / total_opposing_frequencies[key]
@@ -197,7 +203,16 @@ class ThresholdAgent:
 
         for key in flop_frequencies:
             flop_probabilities[key] = {}
-            for public_key in flop_frequencies[key]:
-                flop_probabilities[key][public_key] = flop_frequencies[key][public_key] / sum(flop_frequencies[key].values())
+            for preflop_opponent_range in flop_frequencies[key]:
+                flop_probabilities[key][preflop_opponent_range] = {}
+                for public_key in flop_frequencies[key][preflop_opponent_range]:
+                    flop_probabilities[key][preflop_opponent_range][public_key] = flop_frequencies[key][preflop_opponent_range][public_key] / sum(flop_frequencies[key][preflop_opponent_range].values())
 
         return [ win_probabilities, loss_probabilities, flop_probabilities ]
+
+
+# [ win_probabilities, loss_probabilities, flop_probabilities ] = ThresholdAgent.get_transition_probabilities_for_cards()
+
+# import json
+# with open('flop_probabilities.json', 'w') as json_file:
+#     json.dump(flop_probabilities, json_file, indent=4)
