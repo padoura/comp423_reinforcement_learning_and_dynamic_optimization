@@ -102,7 +102,7 @@ class RandomAgent:
                         if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
                             public_hands = [ public_card1, public_card2 ]
                             key = ''.join(sorted(public_card1.rank + public_card2.rank))
-                            if key not in tie_frequencies:
+                            if my_hand.rank+key not in tie_frequencies:
                                 tie_frequencies[my_hand.rank+key] = 0
                                 win_frequencies[my_hand.rank+key] = 0
                                 loss_frequencies[my_hand.rank+key] = 0
