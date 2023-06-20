@@ -5,6 +5,7 @@ from dealer import Dealer
 from player import Player
 from judger import Judger
 from round import Round
+from utils import try_key_initialization
 
 
 class Game:
@@ -257,8 +258,7 @@ class Game:
                                         if my_hand != public_card2 and public_card1 != public_card2:
                                             public_hands = [ public_card1, public_card2 ]
                                             hand = ''.join(sorted(public_card1.rank + public_card2.rank))
-                                            if hand not in flop_frequencies[my_hand.rank][preflop_opponent_range]:
-                                                flop_frequencies[my_hand.rank][preflop_opponent_range][hand] = 0
+                                            try_key_initialization(flop_frequencies[my_hand.rank][preflop_opponent_range], hand, 0)
                                             flop_frequencies[my_hand.rank][preflop_opponent_range][hand] += 1
 
             for public_card1 in deck:
@@ -267,17 +267,15 @@ class Game:
                         if my_hand != public_card2 and public_card1 != public_card2:
                             public_hands = [ public_card1, public_card2 ]
                             hand = ''.join(sorted(public_card1.rank + public_card2.rank))
-                            if hand not in tie_frequencies[my_hand.rank]:
-                                tie_frequencies[my_hand.rank][hand] = {}
-                                win_frequencies[my_hand.rank][hand] = {}
-                                loss_frequencies[my_hand.rank][hand] = {}
-                                total_opposing_frequencies[my_hand.rank][hand] = {}
+                            try_key_initialization(tie_frequencies[my_hand.rank], hand, {})
+                            try_key_initialization(win_frequencies[my_hand.rank], hand, {})
+                            try_key_initialization(loss_frequencies[my_hand.rank], hand, {})
+                            try_key_initialization(total_opposing_frequencies[my_hand.rank], hand, {})
                             for possible_hand_range in POSSIBLE_HAND_RANGES:
-                                if possible_hand_range not in tie_frequencies[my_hand.rank][hand] and possible_hand_range != '':
-                                    tie_frequencies[my_hand.rank][hand][possible_hand_range] = 0
-                                    win_frequencies[my_hand.rank][hand][possible_hand_range] = 0
-                                    loss_frequencies[my_hand.rank][hand][possible_hand_range] = 0
-                                    total_opposing_frequencies[my_hand.rank][hand][possible_hand_range] = 0
+                                try_key_initialization(tie_frequencies[my_hand.rank][hand], possible_hand_range, 0)
+                                try_key_initialization(win_frequencies[my_hand.rank][hand], possible_hand_range, 0)
+                                try_key_initialization(loss_frequencies[my_hand.rank][hand], possible_hand_range, 0)
+                                try_key_initialization(total_opposing_frequencies[my_hand.rank][hand], possible_hand_range, 0)
                                 for opponent_hand in possible_hand_range:
                                     remaining_opposing_deck = list(filter(lambda card: card.rank == opponent_hand, deck))
                                     for opposing_hand in remaining_opposing_deck:

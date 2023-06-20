@@ -1,5 +1,6 @@
 from dealer import Dealer
 from game import Game
+from utils import try_key_initialization
 
 class RandomAgent:
     ''' A random agent for benchmarking purposes
@@ -201,8 +202,8 @@ class RandomAgent:
 
     @staticmethod
     def add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
-        if key not in state_space: state_space[key] = {}
-        if my_action not in state_space[key]: state_space[key][my_action] = []
+        try_key_initialization(state_space, key, {})
+        try_key_initialization(state_space[key], my_action, [])
         new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards
         state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
 
