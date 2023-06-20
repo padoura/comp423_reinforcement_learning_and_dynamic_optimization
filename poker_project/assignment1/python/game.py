@@ -186,3 +186,144 @@ class Game:
                 self.players[i].hand = hand
             return True
         return False
+    
+    @staticmethod
+    def get_transition_probabilities_for_cards():
+        ''' Calculates transition probabilities for pre- and post-flop state of cards
+        To be used for state transitions of value/policy iteration algorithms
+
+        Returns:
+           [ win_probabilities, loss_probabilities, flop_probabilities ] (dictionaries): Transition probabilities for pre- and post-flop state of cards
+        '''
+
+        deck = Dealer.init_standard_deck()
+        POSSIBLE_HAND_RANGES = [
+            'A',
+            'AJ',
+            'AJK',
+            'AJKQ',
+            'AJKQT',
+            'AK',
+            'AKQ',
+            'AKQT',
+            'AQ',
+            'AQT',
+            'J',
+            'JK',
+            'JKQ',
+            'JKQT',
+            'JQ',
+            'JQT',
+            'K',
+            'KQ',
+            'KQT',
+            'Q',
+            'QT',
+            'T'
+        ]
+        win_frequencies = {}
+        win_probabilities = {}
+        tie_frequencies = {}
+        loss_frequencies = {}
+        loss_probabilities = {}
+        total_opposing_frequencies = {}
+
+        flop_frequencies = {}
+        flop_probabilities = {}
+        
+        my_player = Player(0)
+        my_player.in_chips = 0.5
+        opposing_player = Player(1)
+        opposing_player.in_chips = 0.5
+
+        for my_hand in deck:
+            my_player.hand = [my_hand]
+            flop_frequencies[my_hand.rank] = {}
+            tie_frequencies[my_hand.rank] = {}
+            win_frequencies[my_hand.rank] = {}
+            loss_frequencies[my_hand.rank] = {}
+            total_opposing_frequencies[my_hand.rank] = {}
+
+            for preflop_opponent_range in POSSIBLE_HAND_RANGES:
+                if preflop_opponent_range not in flop_frequencies[my_hand.rank]:
+                    flop_frequencies[my_hand.rank][preflop_opponent_range] = {}
+                    for opponent_hand in preflop_opponent_range:
+                        possibly_removed_cards = list(filter(lambda card: card.rank == opponent_hand, deck))
+                        for removed_card in possibly_removed_cards:
+                            remaining_deck = list(filter(lambda card: card != removed_card, deck))
+                            for public_card1 in remaining_deck:
+                                if my_hand != public_card1:
+                                    for public_card2 in remaining_deck:
+                                        if my_hand != public_card2 and public_card1 != public_card2:
+                                            public_hands = [ public_card1, public_card2 ]
+                                            hand = ''.join(sorted(public_card1.rank + public_card2.rank))
+                                            if hand not in flop_frequencies[my_hand.rank][preflop_opponent_range]:
+                                                flop_frequencies[my_hand.rank][preflop_opponent_range][hand] = 0
+                                            flop_frequencies[my_hand.rank][preflop_opponent_range][hand] += 1
+
+            for public_card1 in deck:
+                if my_hand != public_card1:
+                    for public_card2 in deck:
+                        if my_hand != public_card2 and public_card1 != public_card2:
+                            public_hands = [ public_card1, public_card2 ]
+                            hand = ''.join(sorted(public_card1.rank + public_card2.rank))
+                            if hand not in tie_frequencies[my_hand.rank]:
+                                tie_frequencies[my_hand.rank][hand] = {}
+                                win_frequencies[my_hand.rank][hand] = {}
+                                loss_frequencies[my_hand.rank][hand] = {}
+                                total_opposing_frequencies[my_hand.rank][hand] = {}
+                            for possible_hand_range in POSSIBLE_HAND_RANGES:
+                                if possible_hand_range not in tie_frequencies[my_hand.rank][hand] and possible_hand_range != '':
+                                    tie_frequencies[my_hand.rank][hand][possible_hand_range] = 0
+                                    win_frequencies[my_hand.rank][hand][possible_hand_range] = 0
+                                    loss_frequencies[my_hand.rank][hand][possible_hand_range] = 0
+                                    total_opposing_frequencies[my_hand.rank][hand][possible_hand_range] = 0
+                                for opponent_hand in possible_hand_range:
+                                    remaining_opposing_deck = list(filter(lambda card: card.rank == opponent_hand, deck))
+                                    for opposing_hand in remaining_opposing_deck:
+                                        if my_hand != opposing_hand and public_card1 != opposing_hand and public_card2 != opposing_hand:
+                                            opposing_player.hand = [opposing_hand]
+                                            players = [ my_player, opposing_player ]
+                                            payoffs = Judger.judge_game(players, public_hands)
+                                            total_opposing_frequencies[my_hand.rank][hand][possible_hand_range] += 1
+                                            if payoffs[0] == 0.5:
+                                                win_frequencies[my_hand.rank][hand][possible_hand_range] += 1
+                                            elif payoffs[0] == 0:
+                                                tie_frequencies[my_hand.rank][hand][possible_hand_range] += 1
+                                            else:
+                                                loss_frequencies[my_hand.rank][hand][possible_hand_range] += 1
+        
+        for hand in total_opposing_frequencies:
+            win_probabilities[hand] = {}
+            loss_probabilities[hand] = {}
+            for public_cards in win_frequencies[hand]:
+                win_probabilities[hand][public_cards] = {}
+                loss_probabilities[hand][public_cards] = {}
+                for possible_hand_range in win_frequencies[hand][public_cards]:
+                    win_probabilities[hand][public_cards][possible_hand_range] = win_frequencies[hand][public_cards][possible_hand_range] / total_opposing_frequencies[hand][public_cards][possible_hand_range]
+                    loss_probabilities[hand][public_cards][possible_hand_range] = loss_frequencies[hand][public_cards][possible_hand_range] / total_opposing_frequencies[hand][public_cards][possible_hand_range]
+
+        for hand in flop_frequencies:
+            flop_probabilities[hand] = {}
+            for preflop_opponent_range in flop_frequencies[hand]:
+                flop_probabilities[hand][preflop_opponent_range] = {}
+                for public_key in flop_frequencies[hand][preflop_opponent_range]:
+                    flop_probabilities[hand][preflop_opponent_range][public_key] = flop_frequencies[hand][preflop_opponent_range][public_key] / sum(flop_frequencies[hand][preflop_opponent_range].values())
+
+        return [ win_probabilities, loss_probabilities, flop_probabilities ]
+    
+
+# [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
+
+# import json
+# with open('all_flop_probabilities.json', 'w') as json_file:
+#     json.dump(flop_probabilities, json_file, indent=4)
+
+
+# import json
+# with open('all_loss_probabilities.json', 'w') as json_file:
+#     json.dump(loss_probabilities, json_file, indent=4)
+
+# import json
+# with open('all_win_probabilities.json', 'w') as json_file:
+#     json.dump(win_probabilities, json_file, indent=4)

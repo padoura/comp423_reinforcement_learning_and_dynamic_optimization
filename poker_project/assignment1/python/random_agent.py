@@ -1,6 +1,5 @@
 from dealer import Dealer
-from player import Player
-from judger import Judger
+from game import Game
 
 class RandomAgent:
     ''' A random agent for benchmarking purposes
@@ -64,77 +63,6 @@ class RandomAgent:
         print('\n=========== Actions Random Agent Can Choose ===========')
         print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
         print('')
-   
-    @staticmethod
-    def get_transition_probabilities_for_cards():
-        ''' Calculates transition probabilities for pre- and post-flop state of cards
-        To be used for state transitions of value/policy iteration algorithms
-        Part of the Agent classes because "Threshold" agents range of hands can be inferred from 
-
-        Returns:
-           [ win_probabilities, loss_probabilities, flop_probabilities ] (dictionaries): Transition probabilities for pre- and post-flop state of cards
-        '''
-
-        deck = Dealer.init_standard_deck()
-        win_frequencies = {}
-        win_probabilities = {}
-        tie_frequencies = {}
-        loss_frequencies = {}
-        loss_probabilities = {}
-        total_opposing_frequencies = {}
-
-        flop_frequencies = {}
-        flop_probabilities = {}
-        
-        my_player = Player(0)
-        my_player.in_chips = 0.5
-        opposing_player = Player(1)
-        opposing_player.in_chips = 0.5
-        # num_of_possible_opposing =  (len(deck) - 3) # 3 cards known, the rest are possible opposing_hands remaining
-
-        for my_hand_idx, my_hand in enumerate(deck):
-            my_player.hand = [my_hand]
-            if my_hand.rank not in flop_frequencies:
-                flop_frequencies[my_hand.rank] = {}
-            for public_card1_idx, public_card1 in enumerate(deck):
-                if my_hand_idx != public_card1_idx:
-                    for public_card2_idx, public_card2 in enumerate(deck):
-                        if my_hand_idx != public_card2_idx and public_card1_idx != public_card2_idx:
-                            public_hands = [ public_card1, public_card2 ]
-                            key = ''.join(sorted(public_card1.rank + public_card2.rank))
-                            if my_hand.rank+key not in tie_frequencies:
-                                tie_frequencies[my_hand.rank+key] = 0
-                                win_frequencies[my_hand.rank+key] = 0
-                                loss_frequencies[my_hand.rank+key] = 0
-                                total_opposing_frequencies[my_hand.rank+key] = 0
-                            if key not in flop_frequencies[my_hand.rank]:
-                                flop_frequencies[my_hand.rank][key] = 0
-                            flop_frequencies[my_hand.rank][key] += 1
-                            for opposing_hand_idx, opposing_hand in enumerate(deck):
-                                if my_hand_idx != opposing_hand_idx and public_card1_idx != opposing_hand_idx and public_card2_idx != opposing_hand_idx:
-                                    opposing_player.hand = [opposing_hand]
-                                    players = [ my_player, opposing_player ]
-                                    payoffs = Judger.judge_game(players, public_hands)
-                                    total_opposing_frequencies[my_hand.rank+key] += 1
-                                    # if key == 'QJQ': # DEBUG
-                                    #     print('my hand: ', players[0].hand[0], ', opposing hand: ', players[1].hand[0], ', public 1: ', public_hands[0], ', public 2: ', public_hands[1], ', payoffs: ', payoffs)
-                                    if payoffs[0] == 0.5:
-                                        win_frequencies[my_hand.rank+key] += 1
-                                    elif payoffs[0] == 0:
-                                        tie_frequencies[my_hand.rank+key] += 1
-                                    else:
-                                        loss_frequencies[my_hand.rank+key] += 1
-        
-        for key in total_opposing_frequencies:
-            win_probabilities[key] = win_frequencies[key] / total_opposing_frequencies[key]
-            loss_probabilities[key] = loss_frequencies[key] / total_opposing_frequencies[key]
-
-        for key in flop_frequencies:
-            flop_probabilities[key] = {}
-            for public_key in flop_frequencies[key]:
-                flop_probabilities[key][public_key] = flop_frequencies[key][public_key] / sum(flop_frequencies[key].values())
-
-        return [ win_probabilities, loss_probabilities, flop_probabilities ]
     
     @staticmethod
     def calculate_state_space():
@@ -158,7 +86,7 @@ class RandomAgent:
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         state_space = {}
-        [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
+        [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
 
         ############## position == 'first' #################
         # preflop @ chips [0.5, 0.5]
@@ -254,16 +182,16 @@ class RandomAgent:
                 public_cards = 'none'
                 RandomAgent.add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
             else:
-                for public_cards in flop_probabilities[hand]:
-                    RandomAgent.add_or_update_key(state_space, full_key, flop_probabilities[hand][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                for public_cards in flop_probabilities[hand]['AJKQT']:
+                    RandomAgent.add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
         else: # end of round 2
-            for public_cards in flop_probabilities[hand]:
+            for public_cards in flop_probabilities[hand]['AJKQT']:
                 full_key = key + public_cards
                 if new_other_chips == 0:
                     # game finished, result based on players' hands 
                     is_terminal = True
-                    win_prob = win_probabilities[hand+public_cards]
-                    loss_prob = loss_probabilities[hand+public_cards]
+                    win_prob = win_probabilities[hand][public_cards]['AJKQT']
+                    loss_prob = loss_probabilities[hand][public_cards]['AJKQT']
                     tie_prob = 1 - win_prob - loss_prob
                     for result_prob in [win_prob, loss_prob, tie_prob]:
                         reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
@@ -279,7 +207,7 @@ class RandomAgent:
         state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
 
 # import json
-# [ win_probabilities, loss_probabilities, flop_probabilities ] = RandomAgent.get_transition_probabilities_for_cards()
+# [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
 # with open("win_probabilities.json", "w") as write_file:
 #     json.dump(win_probabilities, write_file, indent=4, sort_keys=True)
 
