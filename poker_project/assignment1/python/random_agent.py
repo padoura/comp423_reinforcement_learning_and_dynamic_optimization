@@ -119,13 +119,13 @@ class RandomAgent:
                         my_legal_actions = ['fold', 'bet'] if position == 'first' else ['raise', 'bet', 'fold']
                     for my_chips in my_starting_chips:
                         for my_action in my_legal_actions:
-                            RandomAgent.calculate_round_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                            RandomAgent._calculate_round_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
         return state_space
     
 
     @staticmethod
-    def calculate_round_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round):
+    def _calculate_round_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + hand + '_'
             if (position == 'first' and other_chips == 0 and my_action == 'bet') or (position == 'second' and my_action == 'raise'):
@@ -135,32 +135,32 @@ class RandomAgent:
                 is_terminal = True
                 new_other_chips = -1
                 reward = my_chips + other_chips
-                RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 if position == 'first':
                     #### other_action == 'raise' ####
                     is_terminal = False
                     new_other_chips = 1
                     reward = 0
-                    RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                    RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (other_chips == 1 and my_action == 'bet'):
                 new_my_chips = my_chips + 1
                 action_prob = 1 # random agent has finished his move by raising
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (my_action == 'fold'):
                 new_my_chips = my_chips
                 action_prob = 1 # random agent has finished his move by raising
                 is_terminal = True
                 new_other_chips = 1
                 reward = -my_chips
-                RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
             elif (my_action == 'check'):
                 new_my_chips = my_chips
                 action_prob = 0.5 if position == 'first' else 1 # first position -> randomly between 'check', 'raise', second position -> round done
@@ -168,24 +168,24 @@ class RandomAgent:
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
                 if position == 'first':
                     #### other_action == 'raise' ####
                     is_terminal = False
                     new_other_chips = 1
                     reward = 0
-                    RandomAgent.calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
+                    RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
     @staticmethod
-    def calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
+    def _calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         if game_round == 1: # end of round 1
             full_key = key + 'none' + '_AJKQT'
             if is_terminal:
                 public_cards = 'none'
-                RandomAgent.add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
             else:
                 for public_cards in flop_probabilities[hand]['AJKQT']:
-                    RandomAgent.add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                    RandomAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
         else: # end of round 2
             for public_cards in flop_probabilities[hand]['AJKQT']:
                 full_key = key + public_cards + '_AJKQT'
@@ -197,12 +197,12 @@ class RandomAgent:
                     tie_prob = 1 - win_prob - loss_prob
                     for result_prob in [win_prob, loss_prob, tie_prob]:
                         reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
-                        RandomAgent.add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                        RandomAgent._add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
                 else:
-                    RandomAgent.add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                    RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
 
     @staticmethod
-    def add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
+    def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
         try_key_initialization(state_space, key, {})
         try_key_initialization(state_space[key], my_action, [])
         new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
