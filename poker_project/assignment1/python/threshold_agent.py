@@ -120,16 +120,16 @@ class ThresholdAgent:
         # Ignoring fold and final bet of the game since after these actions it is over
         if game_round == 1:
             if action == 'raise' or (other_chips == 0 and action == 'bet'):
-                current_range.remove(card for card in ['T', 'J', 'Q'])
+                current_range = 'AK'
             elif action == 'bet':
-                current_range.remove(card for card in ['T', 'K', 'A'])
+                current_range = 'JQ'
             else:
-                current_range.remove(card for card in ['K', 'A'])
+                current_range = 'JQT'
         else:
             if action == 'raise' or (other_chips == 0 and action == 'bet'):
-                current_range = [public_cards[0], public_cards[1]]
+                current_range = public_cards[:]
             else:
-                current_range.remove(card for card in [public_cards[0], public_cards[1]])
+                current_range = current_range.replace(public_cards[0],'').replace(public_cards[1],'')
 
     @staticmethod
     def calculate_state_space():
