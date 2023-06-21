@@ -11,6 +11,33 @@ from utils import try_key_initialization
 class Game:
     ''' The Game class adapted from rlcard
     '''
+
+    POSSIBLE_OPPONENT_RANGES = [
+        'A',
+        'AJ',
+        # 'AJK', # commented out impossible opponent ranges
+        # 'AJKQ',
+        'AJKQT',
+        'AK',
+        # 'AKQ',
+        # 'AKQT',
+        'AQ',
+        # 'AQT',
+        'J',
+        'JK',
+        # 'JKQ',
+        # 'JKQT',
+        'JQ',
+        'JQT',
+        'K',
+        'KQ',
+        # 'KQT',
+        'Q',
+        'QT',
+        'T'
+    ]
+
+
     def __init__(self, allow_step_back=False, num_players=2):
         ''' Initialize the class Game
         '''
@@ -198,30 +225,6 @@ class Game:
         '''
 
         deck = Dealer.init_standard_deck()
-        POSSIBLE_HAND_RANGES = [
-            'A',
-            'AJ',
-            'AJK',
-            'AJKQ',
-            'AJKQT',
-            'AK',
-            'AKQ',
-            'AKQT',
-            'AQ',
-            'AQT',
-            'J',
-            'JK',
-            'JKQ',
-            'JKQT',
-            'JQ',
-            'JQT',
-            'K',
-            'KQ',
-            'KQT',
-            'Q',
-            'QT',
-            'T'
-        ]
         win_frequencies = {}
         win_probabilities = {}
         tie_frequencies = {}
@@ -245,7 +248,7 @@ class Game:
             loss_frequencies[my_hand.rank] = {}
             total_opposing_frequencies[my_hand.rank] = {}
 
-            for preflop_opponent_range in POSSIBLE_HAND_RANGES:
+            for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
                 if preflop_opponent_range not in flop_frequencies[my_hand.rank]:
                     flop_frequencies[my_hand.rank][preflop_opponent_range] = {}
                     for opponent_hand in preflop_opponent_range:
@@ -271,7 +274,7 @@ class Game:
                             try_key_initialization(win_frequencies[my_hand.rank], hand, {})
                             try_key_initialization(loss_frequencies[my_hand.rank], hand, {})
                             try_key_initialization(total_opposing_frequencies[my_hand.rank], hand, {})
-                            for possible_hand_range in POSSIBLE_HAND_RANGES:
+                            for possible_hand_range in Game.POSSIBLE_OPPONENT_RANGES:
                                 try_key_initialization(tie_frequencies[my_hand.rank][hand], possible_hand_range, 0)
                                 try_key_initialization(win_frequencies[my_hand.rank][hand], possible_hand_range, 0)
                                 try_key_initialization(loss_frequencies[my_hand.rank][hand], possible_hand_range, 0)
