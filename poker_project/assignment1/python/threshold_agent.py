@@ -268,8 +268,8 @@ class ThresholdAgent:
                     RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
 
     @staticmethod
-    def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
+    def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range):
         try_key_initialization(state_space, key, {})
         try_key_initialization(state_space[key], my_action, [])
-        new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
+        new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_' + new_opponent_range
         state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
