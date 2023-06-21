@@ -88,7 +88,7 @@ class RandomAgent:
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         state_space = {}
-        [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
+        [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
 
         ############## position == 'first' #################
         # preflop @ chips [0.5, 0.5]

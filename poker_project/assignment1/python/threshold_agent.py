@@ -154,7 +154,7 @@ class ThresholdAgent:
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         state_space = {}
-        [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
+        [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
 
         ############## position == 'first' #################
         # preflop @ chips [0.5, 0.5]
@@ -187,13 +187,13 @@ class ThresholdAgent:
                     opponent_range = 'AK'
                 for my_chips in my_starting_chips:
                     for my_action in my_legal_actions:
-                        ThresholdAgent._calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range)
+                        ThresholdAgent._calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities)
 
         return state_space
     
 
     @staticmethod
-    def _calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range):
+    def _calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities):
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + hand + '_'
             if (position == 'first' and other_chips == 0 and my_action == 'bet'):
@@ -317,3 +317,11 @@ class ThresholdAgent:
         try_key_initialization(state_space[key], my_action, [])
         new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_' + new_opponent_range
         state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
+
+
+# import json
+# state_space = ThresholdAgent.calculate_state_space()
+# print("len(state_space) = ", len(state_space))
+# print("len(state_space[]) = ", sum(len(v) for v in state_space.values()))
+# with open("state_space.json", "w") as write_file:
+#     json.dump(state_space, write_file, indent=4, sort_keys=True)

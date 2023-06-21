@@ -234,6 +234,9 @@ class Game:
 
         flop_frequencies = {}
         flop_probabilities = {}
+
+        range_frequencies = {}
+        range_probabilities = {}
         
         my_player = Player(0)
         my_player.in_chips = 0.5
@@ -311,10 +314,27 @@ class Game:
                 for public_key in flop_frequencies[hand][preflop_opponent_range]:
                     flop_probabilities[hand][preflop_opponent_range][public_key] = flop_frequencies[hand][preflop_opponent_range][public_key] / sum(flop_frequencies[hand][preflop_opponent_range].values())
 
-        return [ win_probabilities, loss_probabilities, flop_probabilities ]
+        for my_hand in deck:
+            range_frequencies[my_hand.rank] = {}
+            for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
+                range_frequencies[my_hand.rank][preflop_opponent_range] = {}
+                for new_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
+                    range_frequencies[my_hand.rank][preflop_opponent_range][new_opponent_range] = 0
+                    for opponent_hand in deck:
+                        if opponent_hand != my_hand and opponent_hand.rank in preflop_opponent_range and opponent_hand.rank in new_opponent_range:
+                            range_frequencies[my_hand.rank][preflop_opponent_range][new_opponent_range] += 1
+
+        for hand in range_frequencies:
+            range_probabilities[hand] = {}
+            for preflop_opponent_range in range_frequencies[hand]:
+                range_probabilities[hand][preflop_opponent_range] = {}
+                for new_opponent_range in range_frequencies[hand][preflop_opponent_range]:
+                    range_probabilities[hand][preflop_opponent_range][new_opponent_range] = range_frequencies[hand][preflop_opponent_range][new_opponent_range] / range_frequencies[hand][preflop_opponent_range][preflop_opponent_range]
+
+        return [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ]
     
 
-# [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
+# [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
 
 # import json
 # with open('all_flop_probabilities.json', 'w') as json_file:
@@ -328,3 +348,7 @@ class Game:
 # import json
 # with open('all_win_probabilities.json', 'w') as json_file:
 #     json.dump(win_probabilities, json_file, indent=4)
+
+# import json
+# with open('range_probabilities.json', 'w') as json_file:
+#     json.dump(range_probabilities, json_file, indent=4)
