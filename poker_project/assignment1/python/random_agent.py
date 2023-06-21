@@ -69,13 +69,14 @@ class RandomAgent:
     def calculate_state_space():
 
 
-        # | Index          | # Enum |Meaning                                                                        |
-        # | ---------------|--------|-------------------------------------------------------------------------------|
-        # | 'position'     |   2    |Position of player 'first'/'second'                                            |
-        # | 'my_chips'     |   5    |chips placed by our agent so far                                               |
-        # | 'other_chips'  |   3    |difference in chips placed between adversary and our agent so far              |
-        # | 'hand'         |   5    |Rank of hand: T ~ A as first public card                                       |
-        # | 'public_cards' |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
+        # | Index            | # Enum |Meaning                                                                        |
+        # | -----------------|--------|-------------------------------------------------------------------------------|
+        # | 'position'       |   2    |Position of player 'first'/'second'                                            |
+        # | 'my_chips'       |   5    |Chips placed by our agent so far                                               |
+        # | 'other_chips'    |   3    |Difference in chips placed between adversary and our agent so far              |
+        # | 'hand'           |   5    |Rank of hand: T ~ A as first public card                                       |
+        # | 'public_cards'   |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
+        # | 'opponent_range' |   <22  |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AJKQT' |
 
         # positions = {'first', 'second'}
         # chips = {'0.5', '1.5', '2.5', '3.5', '4.5'}
@@ -178,7 +179,7 @@ class RandomAgent:
     @staticmethod
     def calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         if game_round == 1: # end of round 1
-            full_key = key + 'none'
+            full_key = key + 'none' + '_AJKQT'
             if is_terminal:
                 public_cards = 'none'
                 RandomAgent.add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
@@ -187,7 +188,7 @@ class RandomAgent:
                     RandomAgent.add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
         else: # end of round 2
             for public_cards in flop_probabilities[hand]['AJKQT']:
-                full_key = key + public_cards
+                full_key = key + public_cards + '_AJKQT'
                 if new_other_chips == 0:
                     # game finished, result based on players' hands 
                     is_terminal = True
@@ -204,7 +205,7 @@ class RandomAgent:
     def add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
         try_key_initialization(state_space, key, {})
         try_key_initialization(state_space[key], my_action, [])
-        new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards
+        new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
         state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
 
 # import json

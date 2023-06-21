@@ -21,7 +21,7 @@ class PolicyIterationAgent:
             action (int): the optimal action
         '''
         if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
-        state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards']
+        state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards'] + '_AJKQT'
         action = self.P_opt[state_key]
         return action
 
