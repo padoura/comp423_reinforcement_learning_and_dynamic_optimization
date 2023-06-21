@@ -243,29 +243,29 @@ class ThresholdAgent:
                     RandomAgent._calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round)
 
     @staticmethod
-    def _calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
+    def _calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range):
         if game_round == 1: # end of round 1
-            full_key = key + 'none' + '_AJKQT'
+            full_key = key + 'none' + '_' + opponent_range
             if is_terminal:
                 public_cards = 'none'
-                RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                ThresholdAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
             else:
-                for public_cards in flop_probabilities[hand]['AJKQT']:
-                    RandomAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                for public_cards in flop_probabilities[hand][opponent_range]:
+                    ThresholdAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand][opponent_range][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
         else: # end of round 2
-            for public_cards in flop_probabilities[hand]['AJKQT']:
-                full_key = key + public_cards + '_AJKQT'
+            for public_cards in flop_probabilities[hand][opponent_range]:
+                full_key = key + public_cards + '_' + opponent_range
                 if new_other_chips == 0:
                     # game finished, result based on players' hands 
                     is_terminal = True
-                    win_prob = win_probabilities[hand][public_cards]['AJKQT']
-                    loss_prob = loss_probabilities[hand][public_cards]['AJKQT']
+                    win_prob = win_probabilities[hand][public_cards][new_opponent_range]
+                    loss_prob = loss_probabilities[hand][public_cards][new_opponent_range]
                     tie_prob = 1 - win_prob - loss_prob
                     for result_prob in [win_prob, loss_prob, tie_prob]:
                         reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
-                        RandomAgent._add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                        ThresholdAgent._add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
                 else:
-                    RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                    ThresholdAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
 
     @staticmethod
     def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range):
