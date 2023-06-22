@@ -18,20 +18,29 @@ class Game:
         # 'AJK', # commented out impossible opponent ranges
         # 'AJKQ',
         'AJKQT',
+        # 'AJKT',
+        # 'AJQ',
+        # 'AJQT',
+        # 'AJT',
         'AK',
         # 'AKQ',
         # 'AKQT',
+        # 'AKT',
         'AQ',
         # 'AQT',
+        'AT',
         'J',
         'JK',
         # 'JKQ',
         # 'JKQT',
+        # 'JKT',
         'JQ',
         'JQT',
+        'JT',
         'K',
         'KQ',
         # 'KQT',
+        'KT',
         'Q',
         'QT',
         'T'
@@ -316,20 +325,38 @@ class Game:
 
         for my_hand in deck:
             range_frequencies[my_hand.rank] = {}
+            range_frequencies[my_hand.rank]['none'] = {}
             for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
-                range_frequencies[my_hand.rank][preflop_opponent_range] = {}
+                range_frequencies[my_hand.rank]['none'][preflop_opponent_range] = {}
                 for new_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
-                    range_frequencies[my_hand.rank][preflop_opponent_range][new_opponent_range] = 0
+                    range_frequencies[my_hand.rank]['none'][preflop_opponent_range][new_opponent_range] = 0
                     for opponent_hand in deck:
                         if opponent_hand != my_hand and opponent_hand.rank in preflop_opponent_range and opponent_hand.rank in new_opponent_range:
-                            range_frequencies[my_hand.rank][preflop_opponent_range][new_opponent_range] += 1
+                            range_frequencies[my_hand.rank]['none'][preflop_opponent_range][new_opponent_range] += 1
+
+        for my_hand in deck:
+            for public_card1 in deck:
+                if my_hand != public_card1:
+                    for public_card2 in deck:
+                        if my_hand != public_card2 and public_card1 != public_card2:
+                            public_cards = ''.join(sorted(public_card1.rank + public_card2.rank))
+                            try_key_initialization(range_frequencies[my_hand.rank], public_cards, {})
+                            for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
+                                range_frequencies[my_hand.rank][public_cards][preflop_opponent_range] = {}
+                                for new_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
+                                    range_frequencies[my_hand.rank][public_cards][preflop_opponent_range][new_opponent_range] = 0
+                                    for opponent_hand in deck:
+                                        if opponent_hand != my_hand and opponent_hand != public_card1 and opponent_hand != public_card2 and opponent_hand.rank in preflop_opponent_range and opponent_hand.rank in new_opponent_range:
+                                            range_frequencies[my_hand.rank][public_cards][preflop_opponent_range][new_opponent_range] += 1        
 
         for hand in range_frequencies:
             range_probabilities[hand] = {}
-            for preflop_opponent_range in range_frequencies[hand]:
-                range_probabilities[hand][preflop_opponent_range] = {}
-                for new_opponent_range in range_frequencies[hand][preflop_opponent_range]:
-                    range_probabilities[hand][preflop_opponent_range][new_opponent_range] = range_frequencies[hand][preflop_opponent_range][new_opponent_range] / range_frequencies[hand][preflop_opponent_range][preflop_opponent_range]
+            for public_cards in range_frequencies[hand]:
+                range_probabilities[hand][public_cards] = {}
+                for opponent_range in range_frequencies[hand][public_cards]:
+                    range_probabilities[hand][public_cards][opponent_range] = {}
+                    for new_opponent_range in range_frequencies[hand][public_cards][opponent_range]:
+                        range_probabilities[hand][public_cards][opponent_range][new_opponent_range] = range_frequencies[hand][public_cards][opponent_range][new_opponent_range] / range_frequencies[hand][public_cards][opponent_range][opponent_range]
 
         return [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ]
     
