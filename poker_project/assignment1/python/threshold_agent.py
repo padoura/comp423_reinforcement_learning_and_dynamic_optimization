@@ -145,7 +145,7 @@ class ThresholdAgent:
         return new_current_range if new_current_range != '' else 'none'
 
     @staticmethod
-    def calculate_state_space():
+    def calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
 
 
         # | Index            | # Enum |Meaning                                                                        |
@@ -167,7 +167,6 @@ class ThresholdAgent:
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         state_space = {}
-        [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
 
         ############## position == 'first' #################
         # preflop @ chips [0.5, 0.5]
@@ -450,7 +449,20 @@ class ThresholdAgent:
 
 
 # import json
-# state_space = ThresholdAgent.calculate_state_space()
+
+# with open('poker_project//assignment1//python//win_probabilities.json') as json_file:
+#     win_probabilities = json.load(json_file)
+
+# with open('poker_project//assignment1//python//loss_probabilities.json') as json_file:
+#     loss_probabilities = json.load(json_file)
+
+# with open('poker_project//assignment1//python//flop_probabilities.json') as json_file:
+#     flop_probabilities = json.load(json_file)
+
+# with open('poker_project//assignment1//python//range_probabilities.json') as json_file:
+#     range_probabilities = json.load(json_file)
+
+# state_space = ThresholdAgent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
 # print("len(state_space) = ", len(state_space))
 # print("len(state_space[]) = ", sum(len(v) for v in state_space.values()))
 # with open("state_space.json", "w") as write_file:

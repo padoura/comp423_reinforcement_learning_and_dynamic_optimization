@@ -1,4 +1,6 @@
 import numpy as np
+import json
+import os
 
 class PolicyIterationAgent:
     ''' An agent following the optimal policy returned by Policy Iteration algorithm
@@ -6,7 +8,18 @@ class PolicyIterationAgent:
 
     def __init__(self, np_random, print_enabled, opponent):
         self.np_random = np_random
-        self.state_space = opponent.calculate_state_space()
+        with open(os.path.dirname(os.path.abspath(__file__))+'\\win_probabilities.json') as json_file:
+            win_probabilities = json.load(json_file)
+
+        with open(os.path.dirname(os.path.abspath(__file__))+'\\loss_probabilities.json') as json_file:
+            loss_probabilities = json.load(json_file)
+
+        with open(os.path.dirname(os.path.abspath(__file__))+'\\flop_probabilities.json') as json_file:
+            flop_probabilities = json.load(json_file)
+
+        with open(os.path.dirname(os.path.abspath(__file__))+'\\range_probabilities.json') as json_file:
+            range_probabilities = json.load(json_file)
+        self.state_space = opponent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
         self.print_enabled = print_enabled
         self.use_raw = True
         self.V_opt,self.P_opt = self.policy_iteration(self.state_space)

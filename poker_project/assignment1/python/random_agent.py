@@ -1,7 +1,5 @@
 from dealer import Dealer
-from game import Game
 from utils import try_key_initialization
-
 class RandomAgent:
     ''' A random agent for benchmarking purposes
     '''
@@ -66,7 +64,7 @@ class RandomAgent:
         print('')
     
     @staticmethod
-    def calculate_state_space():
+    def calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
 
 
         # | Index            | # Enum |Meaning                                                                        |
@@ -88,7 +86,6 @@ class RandomAgent:
         # legal_action_sequences = Judger.get_legal_sequences_of_actions()
 
         state_space = {}
-        [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
 
         ############## position == 'first' #################
         # preflop @ chips [0.5, 0.5]
@@ -203,18 +200,24 @@ class RandomAgent:
 
     @staticmethod
     def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards):
-        try_key_initialization(state_space, key, {})
-        try_key_initialization(state_space[key], my_action, [])
-        new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
-        state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
+        if prob > 0:
+            try_key_initialization(state_space, key, {})
+            try_key_initialization(state_space[key], my_action, [])
+            new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
+            state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
 
 # import json
-# [ win_probabilities, loss_probabilities, flop_probabilities ] = Game.get_transition_probabilities_for_cards()
-# with open("win_probabilities.json", "w") as write_file:
-#     json.dump(win_probabilities, write_file, indent=4, sort_keys=True)
 
-# import json
-# state_space = RandomAgent.calculate_state_space()
+# with open('win_probabilities.json') as json_file:
+#     win_probabilities = json.load(json_file)
+
+# with open('loss_probabilities.json') as json_file:
+#     loss_probabilities = json.load(json_file)
+
+# with open('flop_probabilities.json') as json_file:
+#     flop_probabilities = json.load(json_file)
+
+# state_space = RandomAgent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities)
 # print("len(state_space) = ", len(state_space))
 # print("len(state_space[]) = ", sum(len(v) for v in state_space.values()))
 # with open("state_space.json", "w") as write_file:
