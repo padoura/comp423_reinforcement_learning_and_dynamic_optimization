@@ -177,7 +177,7 @@ class RandomAgent:
     def _calculate_cards_states(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         if game_round == 1: # end of round 1
             full_key = key + 'none' + '_AJKQT'
-            if is_terminal:
+            if new_other_chips != 0:
                 public_cards = 'none'
                 RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
             else:
@@ -208,17 +208,20 @@ class RandomAgent:
 
 # import json
 
-# with open('win_probabilities.json') as json_file:
+# with open('poker_project//assignment1//python//win_probabilities.json') as json_file:
 #     win_probabilities = json.load(json_file)
 
-# with open('loss_probabilities.json') as json_file:
+# with open('poker_project//assignment1//python//loss_probabilities.json') as json_file:
 #     loss_probabilities = json.load(json_file)
 
-# with open('flop_probabilities.json') as json_file:
+# with open('poker_project//assignment1//python//flop_probabilities.json') as json_file:
 #     flop_probabilities = json.load(json_file)
 
-# state_space = RandomAgent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities)
+# with open('poker_project//assignment1//python//range_probabilities.json') as json_file:
+#     range_probabilities = json.load(json_file)
+
+# state_space = RandomAgent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
 # print("len(state_space) = ", len(state_space))
 # print("len(state_space[]) = ", sum(len(v) for v in state_space.values()))
-# with open("state_space.json", "w") as write_file:
+# with open("poker_project//assignment1//python//random_agent_state_space.json", "w") as write_file:
 #     json.dump(state_space, write_file, indent=4, sort_keys=True)

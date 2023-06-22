@@ -416,7 +416,7 @@ class ThresholdAgent:
     def _calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range):
         if game_round == 1: # end of round 1
             full_key = key + 'none' + '_' + opponent_range
-            if is_terminal:
+            if new_other_chips != 0:
                 public_cards = 'none'
                 ThresholdAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
             else:
@@ -465,5 +465,5 @@ class ThresholdAgent:
 # state_space = ThresholdAgent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
 # print("len(state_space) = ", len(state_space))
 # print("len(state_space[]) = ", sum(len(v) for v in state_space.values()))
-# with open("state_space.json", "w") as write_file:
+# with open("poker_project//assignment1//python//threshold_agent_state_space.json", "w") as write_file:
 #     json.dump(state_space, write_file, indent=4, sort_keys=True)
