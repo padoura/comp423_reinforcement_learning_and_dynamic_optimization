@@ -181,8 +181,14 @@ class RandomAgent:
                 public_cards = 'none'
                 RandomAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
             else:
-                for public_cards in flop_probabilities[hand]['AJKQT']:
-                    RandomAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                if position == 'second': # add all possible first actions of first position after flop (either 'bet' or 'check')
+                    new_other_chips_round2_list = [0, 1]
+                    action_prob = action_prob / len(new_other_chips_round2_list)
+                else:
+                    new_other_chips_round2_list = [0]
+                for new_other_chips in new_other_chips_round2_list:
+                    for public_cards in flop_probabilities[hand]['AJKQT']:
+                        RandomAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
         else: # end of round 2
             for public_cards in flop_probabilities[hand]['AJKQT']:
                 full_key = key + public_cards + '_AJKQT'
