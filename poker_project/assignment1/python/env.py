@@ -136,11 +136,11 @@ class Env(object):
         # Loop to play the game
         trajectories[player_id].append(state)
         while not self.is_over():
+            # Agent learns
+            self.agents[player_id].eval_step(trajectories[player_id])
+
             # Agent plays
-            if not is_training:
-                action, _ = self.agents[player_id].eval_step(state)
-            else:
-                action = self.agents[player_id].step(state)
+            action = self.agents[player_id].step(state)         
 
             # Get new opponent range based on action
             new_opponent_range = self.agents[player_id].infer_card_range_from_action(action, self.game.round_counter+1, self.game.players[1 if player_id == 0 else 0].opponent_range, state['obs']['other_chips'], state['obs']['public_cards'], state['obs']['position'])
@@ -149,8 +149,6 @@ class Env(object):
 
             # Environment steps
             next_state, next_player_id = self.step(action, self.agents[player_id].use_raw)
-            # Save action
-            trajectories[player_id].append(action)
 
             # Set the state and player
             state = next_state
@@ -167,6 +165,10 @@ class Env(object):
 
         # Payoffs
         payoffs = self.get_payoffs()
+        
+        # Agent learns about terminal state
+        for player_id in range(self.num_players):
+            self.agents[player_id].eval_step(trajectories[player_id], payoffs[player_id])
 
         return trajectories, payoffs
 
@@ -270,7 +272,7 @@ class Env(object):
             obs['public_cards'] = ''.join(sorted(public_cards[0].rank + public_cards[1].rank))
         else:
             obs['public_cards'] = 'none'
-        obs['opponent_range'] = state['opponent_range']
+        obs['opponent_range'] = state['opponent_range'] # state feature used only by PolicyIterationAgent vs ThresholdAgent
         extracted_state['obs'] = obs
 
         extracted_state['raw_obs'] = state

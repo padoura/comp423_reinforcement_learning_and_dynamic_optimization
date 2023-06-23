@@ -38,16 +38,10 @@ class PolicyIterationAgent:
         action = self.P_opt[state_key]
         return action
 
-    def eval_step(self, state):
-        ''' Predict the action given the curent state for evaluation. The same to step here.
-
-        Args:
-            state (numpy.array): an numpy array that represents the current state
-
-        Returns:
-            action (int): the action predicted (randomly chosen) by the random agent
+    def eval_step(self, states, payoff = None):
+        ''' Method only needed for online learning
         '''
-        return self.step(state), {}
+        pass
 
     def _print_state(self, state, action_record):
         ''' Print out the state
