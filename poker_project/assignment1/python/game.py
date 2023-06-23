@@ -359,23 +359,3 @@ class Game:
                         range_probabilities[hand][public_cards][opponent_range][new_opponent_range] = range_frequencies[hand][public_cards][opponent_range][new_opponent_range] / range_frequencies[hand][public_cards][opponent_range][opponent_range]
 
         return [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ]
-    
-
-# [ win_probabilities, loss_probabilities, flop_probabilities, range_probabilities ] = Game.get_transition_probabilities_for_cards()
-
-# import json
-# with open('all_flop_probabilities.json', 'w') as json_file:
-#     json.dump(flop_probabilities, json_file, indent=4)
-
-
-# import json
-# with open('all_loss_probabilities.json', 'w') as json_file:
-#     json.dump(loss_probabilities, json_file, indent=4)
-
-# import json
-# with open('all_win_probabilities.json', 'w') as json_file:
-#     json.dump(win_probabilities, json_file, indent=4)
-
-# import json
-# with open('range_probabilities.json', 'w') as json_file:
-#     json.dump(range_probabilities, json_file, indent=4)
