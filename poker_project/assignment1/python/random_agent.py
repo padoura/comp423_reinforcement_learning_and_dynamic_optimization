@@ -64,6 +64,11 @@ class RandomAgent:
         print('')
     
     @staticmethod
+    def infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position):
+        return 'AJKQT' # range cannot be inferred by agent's actions
+
+
+    @staticmethod
     def calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
 
 

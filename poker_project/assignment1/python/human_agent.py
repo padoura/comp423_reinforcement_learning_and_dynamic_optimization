@@ -5,7 +5,7 @@ class HumanAgent:
     ''' A human agent adapted from rlcard library. It can be used to play against trained models
     '''
 
-    def __init__(self, num_actions):
+    def __init__(self, num_actions, modelled_opponent):
         ''' Initilize the human agent
 
         Args:
@@ -13,6 +13,7 @@ class HumanAgent:
         '''
         self.use_raw = True
         self.num_actions = num_actions
+        self.modelled_opponent = modelled_opponent
 
     def step(self, state):
         ''' Human agent will display the state and make decisions through interfaces
@@ -64,3 +65,6 @@ class HumanAgent:
         print('\n=========== Actions You Can Choose ===========')
         print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
         print('')
+
+    def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
+        return self.modelled_opponent.infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position) # use what the opponent expects to play against policy iteration agents

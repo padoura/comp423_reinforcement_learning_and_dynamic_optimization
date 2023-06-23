@@ -34,7 +34,7 @@ class PolicyIterationAgent:
             action (int): the optimal action
         '''
         if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
-        state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards'] + '_AJKQT'
+        state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards'] + '_' + state['obs']['opponent_range']
         action = self.P_opt[state_key]
         return action
 
@@ -72,6 +72,10 @@ class PolicyIterationAgent:
         print('\n=========== Actions Policy Iteration Agent Can Choose ===========')
         print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
         print('')
+
+    @staticmethod
+    def infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position):
+        return 'AJKQT' # range cannot be inferred by agent's actions
 
     def policy_evaluation(self, pi, P, gamma = 1.0, epsilon = 1e-10):  #inputs: (1) policy to be evaluated, (2) model of the environment (transition probabilities, etc., see previous cell), (3) discount factor (with default = 1), (4) convergence error (default = 10^{-10})
         # t = 0   #there's more elegant ways to do this

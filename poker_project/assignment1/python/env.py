@@ -142,6 +142,11 @@ class Env(object):
             else:
                 action = self.agents[player_id].step(state)
 
+            # Get new opponent range based on action
+            new_opponent_range = self.agents[player_id].infer_card_range_from_action(action, self.game.round_counter+1, self.game.players[1 if player_id == 0 else 0].opponent_range, state['obs']['other_chips'], state['obs']['public_cards'], state['obs']['position'])
+            # Update new opponent range based on action
+            self.game.players[1 if player_id == 0 else 0].opponent_range = new_opponent_range[:]
+
             # Environment steps
             next_state, next_player_id = self.step(action, self.agents[player_id].use_raw)
             # Save action
@@ -265,6 +270,7 @@ class Env(object):
             obs['public_cards'] = ''.join(sorted(public_cards[0].rank + public_cards[1].rank))
         else:
             obs['public_cards'] = 'none'
+        obs['opponent_range'] = state['opponent_range']
         extracted_state['obs'] = obs
 
         extracted_state['raw_obs'] = state

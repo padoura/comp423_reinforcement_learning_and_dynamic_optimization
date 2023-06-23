@@ -13,6 +13,7 @@ class Player:
         self.hand = []
         self.status = 'alive'
         self.position = None
+        self.opponent_range = 'AJKQT'
 
         # The chips that this player has put in until now
         self.in_chips = 0
@@ -34,7 +35,8 @@ class Player:
             'all_chips': all_chips,
             'my_chips': self.in_chips,
             'legal_actions': legal_actions,
-            'position': self.position
+            'position': self.position,
+            'opponent_range': self.opponent_range
         }
 
     def get_player_id(self):
