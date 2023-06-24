@@ -19,7 +19,7 @@ class QLearningAgent:
         self.alpha = 0.1
 
     def _update_epsilon(self):
-        self.epsilon = 1.0 / self.model['episode_num'] if self.model['episode_num'] != 0 else 1.0
+        self.epsilon = self.model['episode_num']**(-1/3) if self.model['episode_num'] != 0 else 1.0
 
     def step(self, state):
         ''' The steps of a Q-learning algorithm episode
