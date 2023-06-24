@@ -42,8 +42,6 @@ class Env(object):
         self.seed(config['seed'])
         ###### End of super().__init__(config)
         self.actions = ['bet', 'raise', 'fold', 'check']
-        self.state_shape = [[25] for _ in range(self.num_players)]
-        self.action_shape = [None for _ in range(self.num_players)]
 
 
     def reset(self):
@@ -137,7 +135,8 @@ class Env(object):
         trajectories[player_id].append(state)
         while not self.is_over():
             # Agent learns
-            self.agents[player_id].eval_step(trajectories[player_id])
+            player_action_history = [action_entry[1] for action_entry in trajectories[player_id][-1]['action_record'] if action_entry[0] == player_id]
+            self.agents[player_id].eval_step(trajectories[player_id], player_action_history)
 
             # Agent plays
             action = self.agents[player_id].step(state)         
@@ -168,7 +167,8 @@ class Env(object):
         
         # Agent learns about terminal state
         for player_id in range(self.num_players):
-            self.agents[player_id].eval_step(trajectories[player_id], payoffs[player_id])
+            player_action_history = [action_entry[1] for action_entry in trajectories[player_id][-1]['action_record'] if action_entry[0] == player_id]
+            self.agents[player_id].eval_step(trajectories[player_id], player_action_history, payoffs[player_id])
 
         return trajectories, payoffs
 

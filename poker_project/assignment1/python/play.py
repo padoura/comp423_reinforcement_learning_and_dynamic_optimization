@@ -4,9 +4,18 @@
 from env import Env
 from card import Card
 from human_agent import HumanAgent
+from q_learning_agent import QLearningAgent
 from policy_iteration_agent import PolicyIterationAgent
 from random_agent import RandomAgent
 from threshold_agent import ThresholdAgent
+import json
+import os
+
+
+with open(os.path.dirname(os.path.abspath(__file__))+'\\q_trained_model.json') as json_file:
+    q_trained_model = json.load(json_file)
+
+print(len(q_trained_model['Q']))
 
 # Make environment
 env = Env()
@@ -15,11 +24,13 @@ random_agent = RandomAgent(env.np_random, True)
 threshold_agent = ThresholdAgent(True)
 pi_random_agent = PolicyIterationAgent(env.np_random, True, random_agent)
 pi_threshold_agent = PolicyIterationAgent(env.np_random, False, threshold_agent)
-human_agent1 = HumanAgent(env.num_actions, threshold_agent)
+q_learning_agent = QLearningAgent(env.np_random, False, q_trained_model, is_learning = True)
+human_agent1 = HumanAgent(env.num_actions, q_learning_agent)
 env.set_agents([
     human_agent1,
     # human_agent2,
-    pi_threshold_agent,
+    q_learning_agent
+    # pi_threshold_agent,
     # threshold_agent,
     # pi_random_agent,
     # random_agent,

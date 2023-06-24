@@ -31,7 +31,7 @@ class HumanAgent:
             action = int(input('>> Re-choose action (integer): '))
         return state['raw_legal_actions'][action]
 
-    def eval_step(self, states, payoff = None):
+    def eval_step(self, states, action_history, payoff = None):
         ''' Method only needed for online learning
         '''
         pass

@@ -7,11 +7,12 @@ class ThresholdAgent:
     ''' Threshold ("static") agent for benchmarking purposes
     '''
 
-    def __init__(self, print_enabled):
+    def __init__(self, print_enabled, agent_model_is_known = True):
         ''' Initilize the agent
         '''
         self.use_raw = True
         self.print_enabled = print_enabled
+        self.agent_model_is_known = agent_model_is_known
 
     def step(self, state):
         ''' Threshold ("static") agent
@@ -32,7 +33,7 @@ class ThresholdAgent:
             action = self._choose_action_round_2(state)
         return action
 
-    def eval_step(self, states, payoff = None):
+    def eval_step(self, states, action_history, payoff = None):
         ''' Method only needed for online learning
         '''
         pass
@@ -109,37 +110,38 @@ class ThresholdAgent:
 
         return action
     
-    @staticmethod
-    def infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position):
-        if game_round == 1:
-            if action == 'raise' or (other_chips == 0 and action == 'bet') or current_range == 'AK':
-                new_current_range = 'AK'
-            elif action == 'bet':
-                new_current_range = 'JQ'
-            elif action == 'fold':
-                new_current_range = 'T'
+    def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
+        if self.agent_model_is_known:
+            if game_round == 1:
+                if action == 'raise' or (other_chips == 0 and action == 'bet') or current_range == 'AK':
+                    new_current_range = 'AK'
+                elif action == 'bet':
+                    new_current_range = 'JQ'
+                elif action == 'fold':
+                    new_current_range = 'T'
+                else:
+                    new_current_range = 'JQT'
             else:
-                new_current_range = 'JQT'
+                if action == 'raise' or (other_chips == 0 and action == 'bet'):
+                    new_current_range = (public_cards[0] if public_cards[0] in current_range else '') + (public_cards[1] if public_cards[0] != public_cards[1] and public_cards[1] in current_range else '')
+                elif action == 'check' or action == 'fold':
+                    new_current_range = current_range.replace(public_cards[0],'').replace(public_cards[1],'')
+                    if action == 'fold':
+                        new_current_range = new_current_range.replace('A','').replace('K','').replace('Q','')
+                else: # other_chips == 1 and action == 'bet':
+                    if (position == 'second'):
+                        new_current_range = current_range.replace('J','').replace('T','')
+                        new_current_range = new_current_range.replace(public_cards[0],'').replace(public_cards[1],'')
+                    elif (public_cards[0] not in current_range and public_cards[1] not in current_range):
+                        new_current_range = current_range.replace('J','').replace('T','')
+                    else: # first position already bet
+                        new_current_range = current_range[:]
+
+            return new_current_range if new_current_range != '' else 'none'
         else:
-            if action == 'raise' or (other_chips == 0 and action == 'bet'):
-                new_current_range = (public_cards[0] if public_cards[0] in current_range else '') + (public_cards[1] if public_cards[0] != public_cards[1] and public_cards[1] in current_range else '')
-            elif action == 'check' or action == 'fold':
-                new_current_range = current_range.replace(public_cards[0],'').replace(public_cards[1],'')
-                if action == 'fold':
-                    new_current_range = new_current_range.replace('A','').replace('K','').replace('Q','')
-            else: # other_chips == 1 and action == 'bet':
-                if (position == 'second'):
-                    new_current_range = current_range.replace('J','').replace('T','')
-                    new_current_range = new_current_range.replace(public_cards[0],'').replace(public_cards[1],'')
-                elif (public_cards[0] not in current_range and public_cards[1] not in current_range):
-                    new_current_range = current_range.replace('J','').replace('T','')
-                else: # first position already bet
-                    new_current_range = current_range[:]
+            return 'AJKQT' # range cannot be inferred by agent's actions
 
-        return new_current_range if new_current_range != '' else 'none'
-
-    @staticmethod
-    def calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
+    def calculate_state_space(self, win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
 
 
         # | Index            | # Enum |Meaning                                                                        |
@@ -193,7 +195,7 @@ class ThresholdAgent:
                     opponent_range = 'AK'
                 for my_chips in my_starting_chips:
                     for my_action in my_legal_actions:
-                        ThresholdAgent._calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities)
+                        self._calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities)
 
         for position in ['first', 'second']:
             game_round = 2
@@ -205,21 +207,20 @@ class ThresholdAgent:
                         my_starting_chips = [0.5, 1.5, 2.5]
                     if other_chips == 0:
                         my_legal_actions = ['bet', 'check'] if position == 'first' else ['raise', 'check']
-                        opponent_ranges = [ 'AK', 'JQT', 'JQ' ] if position == 'first' else [ ThresholdAgent.infer_card_range_from_action('check', game_round, preflop_opponent_range, other_chips, public_cards, 'first') for preflop_opponent_range in [ 'AK', 'JQT', 'JQ' ] ]
+                        opponent_ranges = [ 'AK', 'JQT', 'JQ' ] if position == 'first' else [ self.infer_card_range_from_action('check', game_round, preflop_opponent_range, other_chips, public_cards, 'first') for preflop_opponent_range in [ 'AK', 'JQT', 'JQ' ] ]
                     else: # other_chips = 1
                         my_legal_actions = ['fold', 'bet'] if position == 'first' else ['raise', 'bet', 'fold']
-                        opponent_ranges = [ ThresholdAgent.infer_card_range_from_action('raise', game_round, preflop_opponent_range, other_chips, public_cards, position) for preflop_opponent_range in [ 'AK', 'JQT', 'JQ' ] ] # position doesn't matter for 'raise'
+                        opponent_ranges = [ self.infer_card_range_from_action('raise', game_round, preflop_opponent_range, other_chips, public_cards, position) for preflop_opponent_range in [ 'AK', 'JQT', 'JQ' ] ] # position doesn't matter for 'raise'
                     for my_chips in my_starting_chips:
                         for my_action in my_legal_actions:
                             for opponent_range in opponent_ranges:
                                 if opponent_range != 'none':
-                                    ThresholdAgent._calculate_round2_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities, public_cards)
+                                    self._calculate_round2_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities, public_cards)
 
         return state_space
     
 
-    @staticmethod
-    def _calculate_round1_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities):
+    def _calculate_round1_states(self, state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities):
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + hand + '_'
             if (position == 'first' and other_chips == 0 and my_action == 'bet'):
@@ -230,21 +231,21 @@ class ThresholdAgent:
                 reward = my_chips + other_chips
                 new_opponent_range = 'T'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
                 new_opponent_range = 'JQ'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
                 #### other_action == 'raise' ####
                 is_terminal = False
                 new_other_chips = 1
                 reward = 0
                 new_opponent_range = 'AK'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (position == 'second' and my_action == 'raise' and other_chips == 0):
                 new_my_chips = my_chips + 1 + other_chips
                 #### other_action == 'fold' ####
@@ -253,14 +254,14 @@ class ThresholdAgent:
                 reward = my_chips + other_chips
                 new_opponent_range = 'T'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
                 new_opponent_range = 'JQ'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (position == 'second' and my_action == 'raise' and other_chips == 1):
                 new_my_chips = my_chips + 1 + other_chips
                 #### other_action == 'bet' ####
@@ -269,7 +270,7 @@ class ThresholdAgent:
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains 'AK'
                 action_prob = 1 # already knows the action based on 'AK' range
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (other_chips == 1 and my_action == 'bet'):
                 new_my_chips = my_chips + 1
                 action_prob = 1 # threshold agent has finished his move by raising
@@ -277,7 +278,7 @@ class ThresholdAgent:
                 new_other_chips = 0
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains 'AK'
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (my_action == 'fold'):
                 new_my_chips = my_chips
                 action_prob = 1 # threshold agent has finished his move by raising
@@ -285,7 +286,7 @@ class ThresholdAgent:
                 new_other_chips = 1
                 reward = -my_chips
                 new_opponent_range = opponent_range[:] # remains 'AK'
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (my_action == 'check' and position == 'second'):
                 new_my_chips = my_chips
                 #### other_action == 'check' ####
@@ -294,7 +295,7 @@ class ThresholdAgent:
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains 'JQT'
                 action_prob = 1 # threshold agent has finished his move by checking
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
             elif (my_action == 'check' and position == 'first'):
                 new_my_chips = my_chips
                 #### other_action == 'check' ####
@@ -303,17 +304,16 @@ class ThresholdAgent:
                 reward = 0
                 new_opponent_range = 'JQT'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
                 #### other_action == 'raise' ####
                 is_terminal = False
                 new_other_chips = 1
                 reward = 0
                 new_opponent_range = 'AK'
                 action_prob = range_probabilities[hand]['none'][opponent_range][new_opponent_range]
-                ThresholdAgent._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
+                self._calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities)
 
-    @staticmethod
-    def _calculate_round2_states(state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities, public_cards):
+    def _calculate_round2_states(self, state_space, position, my_chips, other_chips, my_action, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, range_probabilities, public_cards):
         for hand in Dealer.RANK_LIST:
             key = position + '_' + str(my_chips) + '_' + str(other_chips) + '_' + hand + '_'
             if (position == 'first' and other_chips == 0 and my_action == 'bet'):
@@ -322,39 +322,39 @@ class ThresholdAgent:
                 is_terminal = True
                 new_other_chips = -1
                 reward = my_chips + other_chips
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('fold', game_round, opponent_range, 1, public_cards, 'second')
+                new_opponent_range = self.infer_card_range_from_action('fold', game_round, opponent_range, 1, public_cards, 'second')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('bet', game_round, opponent_range, 1, public_cards, 'second')
+                new_opponent_range = self.infer_card_range_from_action('bet', game_round, opponent_range, 1, public_cards, 'second')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
                 #### other_action == 'raise' ####
                 is_terminal = False
                 new_other_chips = 1
                 reward = 0
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('raise', game_round, opponent_range, 1, public_cards, 'second')
+                new_opponent_range = self.infer_card_range_from_action('raise', game_round, opponent_range, 1, public_cards, 'second')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (position == 'second' and my_action == 'raise' and other_chips == 0):
                 new_my_chips = my_chips + 1 + other_chips
                 #### other_action == 'fold' ####
                 is_terminal = True
                 new_other_chips = -1
                 reward = my_chips + other_chips
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('fold', game_round, opponent_range, 1, public_cards, 'first')
+                new_opponent_range = self.infer_card_range_from_action('fold', game_round, opponent_range, 1, public_cards, 'first')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
                 #### other_action == 'bet' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('bet', game_round, opponent_range, 1, public_cards, 'first')
+                new_opponent_range = self.infer_card_range_from_action('bet', game_round, opponent_range, 1, public_cards, 'first')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (position == 'second' and my_action == 'raise' and other_chips == 1):
                 new_my_chips = my_chips + 1 + other_chips
                 #### other_action == 'bet' ####
@@ -363,7 +363,7 @@ class ThresholdAgent:
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains public_cards
                 action_prob = 1 # already knows the action based on public_cards range
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (other_chips == 1 and my_action == 'bet'):
                 new_my_chips = my_chips + 1
                 action_prob = 1 # threshold agent has finished his move by raising
@@ -371,7 +371,7 @@ class ThresholdAgent:
                 new_other_chips = 0
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains public_cards
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (my_action == 'fold'):
                 new_my_chips = my_chips
                 action_prob = 1 # threshold agent has finished his move by raising
@@ -379,7 +379,7 @@ class ThresholdAgent:
                 new_other_chips = 1
                 reward = -my_chips
                 new_opponent_range = opponent_range[:] # remains public_cards
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (my_action == 'check' and position == 'second'):
                 new_my_chips = my_chips
                 #### other_action == 'check' ####
@@ -388,47 +388,45 @@ class ThresholdAgent:
                 reward = 0
                 new_opponent_range = opponent_range[:] # remains non public_cards
                 action_prob = 1 # threshold agent has finished his move by checking
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
             elif (my_action == 'check' and position == 'first'):
                 new_my_chips = my_chips
                 #### other_action == 'check' ####
                 is_terminal = False
                 new_other_chips = 0
                 reward = 0
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('check', game_round, opponent_range, 0, public_cards, 'second')
+                new_opponent_range = self.infer_card_range_from_action('check', game_round, opponent_range, 0, public_cards, 'second')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
                 #### other_action == 'raise' ####
                 is_terminal = False
                 new_other_chips = 1
                 reward = 0
-                new_opponent_range = ThresholdAgent.infer_card_range_from_action('raise', game_round, opponent_range, 0, public_cards, 'second')
+                new_opponent_range = self.infer_card_range_from_action('raise', game_round, opponent_range, 0, public_cards, 'second')
                 action_prob = range_probabilities[hand][public_cards][opponent_range][new_opponent_range] if new_opponent_range != 'none' else 0
-                ThresholdAgent._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
+                self._calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards)
 
-    @staticmethod
-    def _calculate_cards_states_for_round1(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities):
+    def _calculate_cards_states_for_round1(self, state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, range_probabilities):
         if game_round == 1: # end of round 1
             full_key = key + 'none' + '_' + opponent_range
             if new_other_chips != 0:
                 public_cards = 'none'
-                ThresholdAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
+                self._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
             elif position == 'second': # add all possible first actions of first position after flop (either 'bet' or 'check')
                 for public_cards in flop_probabilities[hand][new_opponent_range]:
                     ### update new_opponent_range after 'check' ####
-                    new_flop_opponent_range = ThresholdAgent.infer_card_range_from_action('check', 2, new_opponent_range, 0, public_cards, 'first')
+                    new_flop_opponent_range = self.infer_card_range_from_action('check', 2, new_opponent_range, 0, public_cards, 'first')
                     flop_action_prob = range_probabilities[hand][public_cards][new_opponent_range][new_flop_opponent_range] if new_flop_opponent_range != 'none' else 0
-                    ThresholdAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob*flop_action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_flop_opponent_range)
+                    self._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob*flop_action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_flop_opponent_range)
                     ### update new_opponent_range after 'bet' ####
-                    new_flop_opponent_range = ThresholdAgent.infer_card_range_from_action('bet', 2, new_opponent_range, 0, public_cards, 'first')
+                    new_flop_opponent_range = self.infer_card_range_from_action('bet', 2, new_opponent_range, 0, public_cards, 'first')
                     flop_action_prob = range_probabilities[hand][public_cards][new_opponent_range][new_flop_opponent_range] if new_flop_opponent_range != 'none' else 0
-                    ThresholdAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob*flop_action_prob, my_action, position, new_my_chips, 1, is_terminal, reward, hand, public_cards, new_flop_opponent_range)
+                    self._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob*flop_action_prob, my_action, position, new_my_chips, 1, is_terminal, reward, hand, public_cards, new_flop_opponent_range)
             else:
                 for public_cards in flop_probabilities[hand][new_opponent_range]:
-                    ThresholdAgent._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)    
+                    self._add_or_update_key(state_space, full_key, flop_probabilities[hand][new_opponent_range][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)    
 
-    @staticmethod
-    def _calculate_cards_states_for_round2(state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards):
+    def _calculate_cards_states_for_round2(self, state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round, opponent_range, new_opponent_range, public_cards):
         if game_round == 2: # end of round 2
             full_key = key + public_cards + '_' + opponent_range
             if new_other_chips == 0:
@@ -439,12 +437,11 @@ class ThresholdAgent:
                 tie_prob = 1 - win_prob - loss_prob
                 for result_prob in [win_prob, loss_prob, tie_prob]:
                     reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
-                    ThresholdAgent._add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
+                    self._add_or_update_key(state_space, full_key, result_prob*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
             else:
-                ThresholdAgent._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
+                self._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range)
 
-    @staticmethod
-    def _add_or_update_key(state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range):
+    def _add_or_update_key(self, state_space, key, prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards, new_opponent_range):
         if prob > 0:
             try_key_initialization(state_space, key, {})
             try_key_initialization(state_space[key], my_action, [])
