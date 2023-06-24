@@ -22,7 +22,7 @@ class PolicyIterationAgent:
         self.state_space = opponent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
         self.print_enabled = print_enabled
         self.use_raw = True
-        self.V_opt,self.P_opt = self.policy_iteration(self.state_space)
+        self.V_opt,self.P_opt = self.policy_iteration(self.state_space, gamma = 1.0)
 
     def step(self, state):
         ''' Policy Iteration algorithm
