@@ -12,7 +12,7 @@ import json
 import os
 
 
-with open(os.path.dirname(os.path.abspath(__file__))+'\\q_trained_model.json') as json_file:
+with open(os.path.dirname(os.path.abspath(__file__))+'\\q_threshold_model.json') as json_file:
     q_trained_model = json.load(json_file)
 
 print(len(q_trained_model['Q']))
