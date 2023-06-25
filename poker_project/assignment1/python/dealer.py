@@ -4,7 +4,7 @@ from card import Card
 class Dealer:
 
     SUIT_LIST = ['S', 'H', 'D', 'C']
-    RANK_LIST = ['A', 'Q', 'K']
+    RANK_LIST = ['A', 'K']
 
     def __init__(self, np_random):
         self.np_random = np_random

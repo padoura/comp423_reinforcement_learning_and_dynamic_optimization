@@ -68,7 +68,7 @@ class PolicyIterationAgent:
         print('')
 
     def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
-        return 'AKQ' # range cannot be inferred by agent's actions
+        return 'AK' # range cannot be inferred by agent's actions
 
     def policy_evaluation(self, pi, P, gamma = 1.0, epsilon = 1e-10):  #inputs: (1) policy to be evaluated, (2) model of the environment (transition probabilities, etc., see previous cell), (3) discount factor (with default = 1), (4) convergence error (default = 10^{-10})
         # t = 0   #there's more elegant ways to do this
