@@ -7,7 +7,7 @@ class QLearningAgent:
     ''' An agent following the optimal policy returned by Q-Learning algorithm
     '''
 
-    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True):
+    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True, slow_decay = True):
         self.np_random = np_random
         self.print_enabled = print_enabled
         self.use_raw = True
@@ -17,14 +17,19 @@ class QLearningAgent:
         self._update_epsilon()
         # self.epsilon = 0.1
         self._update_alpha()
+        self.slow_decay = slow_decay
 
     def _update_epsilon(self):
-        self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/4) < 0.0001 else self.model['episode_num']**(-1/4) # vs random agent
-        # self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/1) < 0.0001 else self.model['episode_num']**(-1/1) # vs threshold agent
+        if self.slow_decay:
+            self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/4) < 0.0001 else self.model['episode_num']**(-1/4) # vs random agent
+        else:
+            self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/1) < 0.0001 else self.model['episode_num']**(-1/1) # vs threshold agent
 
     def _update_alpha(self):
-        self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/4) < 0.01 else self.model['episode_num']**(-1/4) # vs random agent
-        # self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/1) < 0.01 else self.model['episode_num']**(-1/1) # vs threshold agent
+        if self.slow_decay:
+            self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/4) < 0.01 else self.model['episode_num']**(-1/4) # vs random agent
+        else:
+            self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/1) < 0.01 else self.model['episode_num']**(-1/1) # vs threshold agent
 
     def step(self, state):
         ''' The steps of a Q-learning algorithm episode
