@@ -11,13 +11,13 @@ class QLearningAgent:
         self.np_random = np_random
         self.print_enabled = print_enabled
         self.use_raw = True
-        self.model = pretrained_model if pretrained_model != None else { 'Q': {}, 'episode_num': 0}
+        self.model = pretrained_model if pretrained_model != None else { 'Q': {}, 'episode_num': 0, 'policy': {}}
         self.is_learning = is_learning
         self.gamma = 1.0
+        self.slow_decay = slow_decay
         self._update_epsilon()
         # self.epsilon = 0.1
         self._update_alpha()
-        self.slow_decay = slow_decay
 
     def _update_epsilon(self):
         if self.slow_decay:
@@ -44,7 +44,7 @@ class QLearningAgent:
         state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards'] + '_' + state['obs']['opponent_range']
         Q = self.model['Q']
         ## Choose action from state using policy derived from Q and e-greedy
-        action = self.np_random.choice(state['raw_legal_actions']) if self.np_random.binomial(1, self.epsilon) == 1 else max(Q[state_key], key=Q[state_key].get)
+        action = self.np_random.choice(state['raw_legal_actions']) if self.np_random.binomial(1, self.epsilon) == 1 else self.model['policy'][state_key]
         return action
 
     def eval_step(self, states, action_history, payoff = None):
@@ -63,6 +63,7 @@ class QLearningAgent:
         Q = self.model['Q']
         if payoff == None: # there is no need to store terminal states
             try_key_initialization(Q, new_state_key, {action: 0.0 for action in new_state['raw_legal_actions']})
+            try_key_initialization(self.model['policy'], new_state_key, new_state['raw_legal_actions'][0])
 
         ## Update Q if learning is enabled and action was performed
         if self.is_learning:
@@ -76,6 +77,7 @@ class QLearningAgent:
                     self.model['episode_num'] += 1
                     self._update_epsilon()
                     self._update_alpha()
+                self.model['policy'][old_state_key] = max(Q[old_state_key], key=Q[old_state_key].get)
 
     def _print_state(self, state, action_record):
         ''' Print out the state

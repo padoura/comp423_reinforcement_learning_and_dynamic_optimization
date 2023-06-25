@@ -36,12 +36,12 @@ num_of_games = 100000
 q_learning_agent_payoffs = []
 print("Running ", num_of_games, " games \"Q Learning Agent vs Threshold Agent\"...")
 for i in range(num_of_games):
-    # print("Game: ", i)
+    print(round(i/num_of_games*100, 1),"% complete\r", end="")
 
     trajectories, payoffs = env.run(is_training=False)
     q_learning_agent_payoffs.append(payoffs[0])
 
-print("Average payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
+print("\nAverage payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
 
 # print("Storing trained model...")
 
@@ -49,34 +49,34 @@ num_of_games = 100000
 q_learning_agent_payoffs = []
 print("Running ", num_of_games, " games \"Q Learning Agent vs Threshold Agent\"...")
 for i in range(num_of_games):
-    # print("Game: ", i)
+    print(round(i/num_of_games*100, 1),"% complete\r", end="")
 
     trajectories, payoffs = env.run(is_training=False)
     q_learning_agent_payoffs.append(payoffs[0])
 
-print("Average payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
+print("\nAverage payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
 
 num_of_games = 100000
 q_learning_agent_payoffs = []
 print("Running ", num_of_games, " games \"Q Learning Agent vs Threshold Agent\"...")
 for i in range(num_of_games):
-    # print("Game: ", i)
+    print(round(i/num_of_games*100, 1),"% complete\r", end="")
 
     trajectories, payoffs = env.run(is_training=False)
     q_learning_agent_payoffs.append(payoffs[0])
 
-print("Average payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
+print("\nAverage payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
 
 num_of_games = 100000
 q_learning_agent_payoffs = []
 print("Running ", num_of_games, " games \"Q Learning Agent vs Threshold Agent\"...")
 for i in range(num_of_games):
-    # print("Game: ", i)
+    print(round(i/num_of_games*100, 1),"% complete\r", end="")
 
     trajectories, payoffs = env.run(is_training=False)
     q_learning_agent_payoffs.append(payoffs[0])
 
-print("Average payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
+print("\nAverage payoffs:  ", sum(q_learning_agent_payoffs)/num_of_games)
 
 with open(os.path.dirname(os.path.abspath(__file__))+'\\q_test.json', 'w') as json_file:
     json.dump(q_learning_agent.model, json_file, indent=4, sort_keys=True)
