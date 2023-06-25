@@ -13,13 +13,18 @@ class QLearningAgent:
         self.use_raw = True
         self.model = pretrained_model if pretrained_model != None else { 'Q': {}, 'episode_num': 0}
         self.is_learning = is_learning
-        self.gamma = 0.1
+        self.gamma = 1.0
         self._update_epsilon()
         # self.epsilon = 0.1
-        self.alpha = 0.1
+        self._update_alpha()
 
     def _update_epsilon(self):
-        self.epsilon = self.model['episode_num']**(-1/3) if self.model['episode_num'] != 0 else 1.0
+        self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/4) < 0.0001 else self.model['episode_num']**(-1/4) # vs random agent
+        # self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/1) < 0.0001 else self.model['episode_num']**(-1/1) # vs threshold agent
+
+    def _update_alpha(self):
+        self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/4) < 0.01 else self.model['episode_num']**(-1/4) # vs random agent
+        # self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/1) < 0.01 else self.model['episode_num']**(-1/1) # vs threshold agent
 
     def step(self, state):
         ''' The steps of a Q-learning algorithm episode
@@ -65,6 +70,7 @@ class QLearningAgent:
                     Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (payoff - Q[old_state_key][latest_action])
                     self.model['episode_num'] += 1
                     self._update_epsilon()
+                    self._update_alpha()
 
     def _print_state(self, state, action_record):
         ''' Print out the state
