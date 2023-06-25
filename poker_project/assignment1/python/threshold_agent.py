@@ -139,7 +139,7 @@ class ThresholdAgent:
 
             return new_current_range if new_current_range != '' else 'none'
         else:
-            return 'AJKQT' # range cannot be inferred by agent's actions
+            return 'AKQ' # range cannot be inferred by agent's actions
 
     def calculate_state_space(self, win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
 
@@ -151,7 +151,7 @@ class ThresholdAgent:
         # | 'other_chips'    |   3    |Difference in chips placed between adversary and our agent so far              |
         # | 'hand'           |   5    |Rank of hand: T ~ A as first public card                                       |
         # | 'public_cards'   |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
-        # | 'opponent_range' |   <22  |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AJKQT' |
+        # | 'opponent_range' |   <22  |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AKQ' |
 
         # positions = {'first', 'second'}
         # chips = {'0.5', '1.5', '2.5', '3.5', '4.5'}
@@ -189,7 +189,7 @@ class ThresholdAgent:
                     my_starting_chips = [0.5]
                 if other_chips == 0:
                     my_legal_actions = ['bet', 'check'] if position == 'first' else ['raise', 'check']
-                    opponent_range = 'AJKQT' if position == 'first' else 'JQT'
+                    opponent_range = 'AKQ' if position == 'first' else 'JQT'
                 else: # other_chips = 1
                     my_legal_actions = ['fold', 'bet'] if position == 'first' else ['raise', 'bet', 'fold']
                     opponent_range = 'AK'

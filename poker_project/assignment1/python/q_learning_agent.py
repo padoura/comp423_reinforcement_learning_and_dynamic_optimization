@@ -97,4 +97,4 @@ class QLearningAgent:
         print('')
 
     def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
-        return 'AJKQT' # range cannot be inferred by agent's actions
+        return 'AKQ' # range cannot be inferred by agent's actions

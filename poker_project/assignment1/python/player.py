@@ -13,7 +13,7 @@ class Player:
         self.hand = []
         self.status = 'alive'
         self.position = None
-        self.opponent_range = 'AJKQT'
+        self.opponent_range = 'AKQ'
 
         # The chips that this player has put in until now
         self.in_chips = 0

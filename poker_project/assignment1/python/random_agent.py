@@ -58,7 +58,7 @@ class RandomAgent:
         print('')
     
     def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
-        return 'AJKQT' # range cannot be inferred by agent's actions
+        return 'AKQ' # range cannot be inferred by agent's actions
 
 
     def calculate_state_space(self, win_probabilities, loss_probabilities, flop_probabilities, range_probabilities):
@@ -71,7 +71,7 @@ class RandomAgent:
         # | 'other_chips'    |   3    |Difference in chips placed between adversary and our agent so far              |
         # | 'hand'           |   5    |Rank of hand: T ~ A as first public card                                       |
         # | 'public_cards'   |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
-        # | 'opponent_range' |   <22  |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AJKQT' |
+        # | 'opponent_range' |   <22  |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AKQ' |
 
         # positions = {'first', 'second'}
         # chips = {'0.5', '1.5', '2.5', '3.5', '4.5'}
@@ -171,7 +171,7 @@ class RandomAgent:
 
     def _calculate_cards_states(self, state_space, key, my_action, action_prob, position, new_my_chips, new_other_chips, is_terminal, reward, hand, win_probabilities, loss_probabilities, flop_probabilities, game_round):
         if game_round == 1: # end of round 1
-            full_key = key + 'none' + '_AJKQT'
+            full_key = key + 'none' + '_AKQ'
             if new_other_chips != 0:
                 public_cards = 'none'
                 self._add_or_update_key(state_space, full_key, action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
@@ -182,16 +182,16 @@ class RandomAgent:
                 else:
                     new_other_chips_round2_list = [0]
                 for new_other_chips in new_other_chips_round2_list:
-                    for public_cards in flop_probabilities[hand]['AJKQT']:
-                        self._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AJKQT'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
+                    for public_cards in flop_probabilities[hand]['AKQ']:
+                        self._add_or_update_key(state_space, full_key, flop_probabilities[hand]['AKQ'][public_cards]*action_prob, my_action, position, new_my_chips, new_other_chips, is_terminal, reward, hand, public_cards)
         else: # end of round 2
-            for public_cards in flop_probabilities[hand]['AJKQT']:
-                full_key = key + public_cards + '_AJKQT'
+            for public_cards in flop_probabilities[hand]['AKQ']:
+                full_key = key + public_cards + '_AKQ'
                 if new_other_chips == 0:
                     # game finished, result based on players' hands 
                     is_terminal = True
-                    win_prob = win_probabilities[hand][public_cards]['AJKQT']
-                    loss_prob = loss_probabilities[hand][public_cards]['AJKQT']
+                    win_prob = win_probabilities[hand][public_cards]['AKQ']
+                    loss_prob = loss_probabilities[hand][public_cards]['AKQ']
                     tie_prob = 1 - win_prob - loss_prob
                     for result_prob in [win_prob, loss_prob, tie_prob]:
                         reward = new_my_chips if result_prob == win_prob else -new_my_chips if result_prob == loss_prob else 0
@@ -203,5 +203,5 @@ class RandomAgent:
         if prob > 0:
             try_key_initialization(state_space, key, {})
             try_key_initialization(state_space[key], my_action, [])
-            new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AJKQT'
+            new_key = position + '_' + str(new_my_chips) + '_' + str(new_other_chips) + '_' + hand + '_' + public_cards + '_AKQ'
             state_space[key][my_action].append( (prob, new_key, reward, is_terminal)  )
