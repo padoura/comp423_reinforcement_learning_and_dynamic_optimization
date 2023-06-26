@@ -15,21 +15,22 @@ class QLearningAgent:
         self.is_learning = is_learning
         self.gamma = 1.0
         self.slow_decay = slow_decay
+        self.initial_epsilon = 1.0 if self.slow_decay else 0.1
         self._update_epsilon()
-        # self.epsilon = 0.1
+        self.initial_alpha = 1.0 if self.slow_decay else 0.1
         self._update_alpha()
 
     def _update_epsilon(self):
         if self.slow_decay:
-            self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/4) < 0.0001 else self.model['episode_num']**(-1/4) # vs random agent
+            self.epsilon = self.initial_epsilon if self.model['episode_num'] == 0 else self.initial_epsilon*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_random_tuning.py
         else:
-            self.epsilon = 1.0 if self.model['episode_num'] == 0 else 0.0001 if self.model['episode_num']**(-1/1) < 0.0001 else self.model['episode_num']**(-1/1) # vs threshold agent
+            self.epsilon = self.initial_epsilon if self.model['episode_num'] == 0 else self.initial_epsilon*self.model['episode_num']**(-2/3) # vs threshold agent, manually selected based on results of q_threshold_tuning.py
 
     def _update_alpha(self):
         if self.slow_decay:
-            self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/4) < 0.01 else self.model['episode_num']**(-1/4) # vs random agent
+            self.alpha = self.initial_alpha if self.model['episode_num'] == 0 else self.initial_alpha*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_random_tuning.py
         else:
-            self.alpha = 1.0 if self.model['episode_num'] == 0 else 0.01 if self.model['episode_num']**(-1/1) < 0.01 else self.model['episode_num']**(-1/1) # vs threshold agent
+            self.alpha = self.initial_alpha if self.model['episode_num'] == 0 else self.initial_alpha*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_threshold_tuning.py
 
     def step(self, state):
         ''' The steps of a Q-learning algorithm episode
