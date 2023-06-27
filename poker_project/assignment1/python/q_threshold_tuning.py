@@ -56,7 +56,7 @@ env = Env()
 threshold_agent = ThresholdAgent(False, False)
 print("Running Q Learning algorithm for Threshold Agent...")
 pretrained_model = None
-with open(os.path.dirname(os.path.abspath(__file__))+'\\q_threshold_model2.json') as json_file:
+with open('q_threshold_model2.json') as json_file:
     pretrained_model = json.load(json_file)
 q_learning_agent = QLearningAgent(env.np_random, False, pretrained_model, is_learning = True, slow_decay = False)
 env.set_agents([
@@ -67,7 +67,7 @@ env.set_agents([
 num_of_games = 10**5
 window_size = 10**5
 agent_payoffs = []
-with open(os.path.dirname(os.path.abspath(__file__))+'\\q_threshold_payoffs2.json') as json_file:
+with open('q_threshold_payoffs2.json') as json_file:
     agent_payoffs = json.load(json_file)
 print("Running ", num_of_games, " games \"Q Learning Agent vs Threshold Agent\"...")
 print("Progress (%)")
@@ -121,9 +121,9 @@ Figure(
     filename = "moving_averages_threshold2"
 )
 
-with open(os.path.dirname(os.path.abspath(__file__))+'\\q_threshold_model2.json', 'w') as json_file:
+with open('q_threshold_model2.json', 'w') as json_file:
     json.dump(q_learning_agent.model, json_file, indent=4, sort_keys=True)
 print("Stored trained model successfully!")
 
-with open(os.path.dirname(os.path.abspath(__file__))+'\\q_threshold_payoffs2.json', 'w') as json_file:
+with open('q_threshold_payoffs2.json', 'w') as json_file:
     json.dump(agent_payoffs, json_file, indent=4, sort_keys=True)
