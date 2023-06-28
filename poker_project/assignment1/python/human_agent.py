@@ -10,10 +10,11 @@ class HumanAgent:
 
         Args:
             num_actions (int): the size of the ouput action space
+            modelled_opponent (Agent class): 
         '''
         self.use_raw = True
         self.num_actions = num_actions
-        self.modelled_opponent = modelled_opponent
+        self.modelled_opponent = modelled_opponent # Set the opposing agent so that the appropriate infer_card_range_from_action() method is used
 
     def step(self, state):
         ''' Human agent will display the state and make decisions through interfaces
@@ -61,4 +62,7 @@ class HumanAgent:
         print('')
 
     def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
-        return self.modelled_opponent.infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position) # use what the opponent expects to play against policy iteration agents
+        # use what the opponent expects, to play against policy iteration agents 
+        # WARNING: KeyError may occur when playing against the optimal policy for ThresholdAgent if unexpected moves are selected
+        # (e.g. raising without A or K in hand for round 1, not raising in flop with AK as public cards in round 2)
+        return self.modelled_opponent.infer_card_range_from_action(action, game_round, current_range, other_chips, public_cards, position)

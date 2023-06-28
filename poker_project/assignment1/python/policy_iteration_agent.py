@@ -7,6 +7,7 @@ class PolicyIterationAgent:
 
     def __init__(self, np_random, print_enabled, opponent):
         self.np_random = np_random
+         # preloading probabilities for using them in state transitions
         with open('win_probabilities.json') as json_file:
             win_probabilities = json.load(json_file)
 
@@ -19,12 +20,12 @@ class PolicyIterationAgent:
         with open('range_probabilities.json') as json_file:
             range_probabilities = json.load(json_file)
         self.state_space = opponent.calculate_state_space(win_probabilities, loss_probabilities, flop_probabilities, range_probabilities)
-        self.print_enabled = print_enabled
+        self.print_enabled = print_enabled # to prevent printing of cli for no-human games
         self.use_raw = True
         self.V_opt,self.P_opt = self.policy_iteration(self.state_space, gamma = 1.0)
 
     def step(self, state):
-        ''' Policy Iteration algorithm
+        ''' Given current state, choose the optimal action based on Policy Iteration algorithm
 
         Args:
             state (dict): A dictionary that represents the current state
@@ -52,10 +53,6 @@ class PolicyIterationAgent:
         if len(action_record) > 0:
             print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
-        # print('\n=============== Community Card ===============')
-        # Card.print_card(state['public_cards'])
-        # print('===============   Your Hand    ===============')
-        # Card.print_card(state['hand'])
         print('===============     Chips      ===============')
         for i in range(len(state['all_chips'])):
             if i == state['current_player']:
@@ -68,6 +65,14 @@ class PolicyIterationAgent:
 
     def infer_card_range_from_action(self, action, game_round, current_range, other_chips, public_cards, position):
         return 'AJKQT' # range cannot be inferred by agent's actions
+
+    ############################################################################
+    # Policy Iteration Algorithm
+    # 
+    # Algorithm adapted from class' Frozen Lake example implementation
+    # The most important change I had to perform was conversion of numpy arrays
+    # into dictionaries for my choice of state representation.
+    ############################################################################
 
     def policy_evaluation(self, pi, P, gamma = 1.0, epsilon = 1e-10):  #inputs: (1) policy to be evaluated, (2) model of the environment (transition probabilities, etc., see previous cell), (3) discount factor (with default = 1), (4) convergence error (default = 10^{-10})
         # t = 0   #there's more elegant ways to do this

@@ -18,10 +18,10 @@ class Env(object):
     def __init__(self, config = { 'allow_step_back': False, 'seed': None }):
         ''' Initialize the Limitholdem environment
         '''
-        self.name = 'leduc-holdem' 
         self.default_game_config = DEFAULT_GAME_CONFIG
         self.game = Game()
-        ###### Start of super().__init__(config)
+        # Set random seed, default is None
+        self.seed(config['seed'])
         self.allow_step_back = self.game.allow_step_back = config['allow_step_back']
         self.action_recorder = []
 
@@ -37,10 +37,7 @@ class Env(object):
 
         # A counter for the timesteps
         self.timestep = 0
-
-        # Set random seed, default is None
-        self.seed(config['seed'])
-        ###### End of super().__init__(config)
+        
         self.actions = ['bet', 'raise', 'fold', 'check']
 
 
@@ -50,8 +47,8 @@ class Env(object):
         Returns:
             (tuple): Tuple containing:
 
-                (numpy.array): The begining state of the game
-                (int): The begining player
+                (list): The beginning state of the game
+                (int): The beginning player
         '''
         state, player_id = self.game.init_game()
         self.action_recorder = []
@@ -112,21 +109,18 @@ class Env(object):
         '''
         self.agents = agents
 
-    def run(self, is_training=False):
+    def run(self):
         '''
         Run a complete game, either for evaluation or training RL agent.
-
-        Args:
-            is_training (boolean): True if for training purpose.
 
         Returns:
             (tuple) Tuple containing:
 
                 (list): A list of trajectories generated from the environment.
-                (list): A list payoffs. Each entry corresponds to one player.
+                (list): A list of payoffs. Each entry corresponds to one player.
 
-        Note: The trajectories are 3-dimension list. The first dimension is for different players.
-              The second dimension is for different transitions. The third dimension is for the contents of each transiton
+        Note: The trajectories are 2-dimension lists. The first dimension is for different players,
+              while the second dimension is for the contents of each transition
         '''
         trajectories = [[] for _ in range(self.num_players)]
         state, player_id = self.reset()
@@ -141,7 +135,7 @@ class Env(object):
             # Agent plays
             action = self.agents[player_id].step(state)         
 
-            # Get new opponent range based on action
+            # Get new opponent range based on action (only applicable vs ThresholdAgent as known opponent)
             new_opponent_range = self.agents[player_id].infer_card_range_from_action(action, self.game.round_counter+1, self.game.players[1 if player_id == 0 else 0].opponent_range, state['obs']['other_chips'], state['obs']['public_cards'], state['obs']['position'])
             # Update new opponent range based on action
             self.game.players[1 if player_id == 0 else 0].opponent_range = new_opponent_range[:]
@@ -165,7 +159,7 @@ class Env(object):
         # Payoffs
         payoffs = self.get_payoffs()
         
-        # Agent learns about terminal state
+        # Agent learns from terminal state
         for player_id in range(self.num_players):
             player_action_history = [action_entry[1] for action_entry in trajectories[player_id][-1]['action_record'] if action_entry[0] == player_id]
             self.agents[player_id].eval_step(trajectories[player_id], player_action_history, payoffs[player_id])
@@ -173,7 +167,7 @@ class Env(object):
         return trajectories, payoffs
 
     def is_over(self):
-        ''' Check whether the curent game is over
+        ''' Check whether the current game is over
 
         Returns:
             (boolean): True if current game is over
@@ -196,7 +190,7 @@ class Env(object):
             player_id (int): The player id
 
         Returns:
-            (numpy.array): The observed state of the player
+            (list): The observed state of the player
         '''
         return self._extract_state(self.game.get_state(player_id))
 
@@ -223,17 +217,6 @@ class Env(object):
         state['legal_actions'] = self.game.round.get_legal_actions()
         return state
 
-    def get_action_feature(self, action):
-        ''' For some environments such as DouDizhu, we can have action features
-
-        Returns:
-            (numpy.array): The action features
-        '''
-        # By default we use one-hot encoding
-        feature = np.zeros(self.num_actions, dtype=np.int8)
-        feature[action] = 1
-        return feature
-
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         self.game.np_random = self.np_random
@@ -243,13 +226,14 @@ class Env(object):
         ''' Extract the state representation for learning 'obs'.
         I chose descriptive representation over optimized memory usage.
 
-        | Index          | # Enum |Meaning                                                                        |
-        | ---------------|--------|-------------------------------------------------------------------------------|
-        | 'position'     |   2    |Position of player 'first'/'second'                                            |
-        | 'hand'         |   5    |Rank of hand: T ~ A as first public card                                       |
-        | 'my_chips'     |   5    |chips in game by our agent                                                     |
-        | 'other_chips'  |   5    |chips in game by adversary                                                     |
-        | 'public_cards' |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
+        # | Index            | # Enum |Meaning                                                                        |
+        # | -----------------|--------|-------------------------------------------------------------------------------|
+        # | 'position'       |   2    |Position of player 'first'/'second'                                            |
+        # | 'my_chips'       |   5    |Chips placed by our agent so far                                               |
+        # | 'other_chips'    |   3    |Difference in chips placed between adversary and our agent so far (-1, 0, 1)   |
+        # | 'hand'           |   5    |Rank of hand: T ~ A as first public card                                       |
+        # | 'public_cards'   |   16   |Rank of public cards in alphabetical order e.g. 'AK' or 'none' if not shown yet|
+        # | 'opponent_range' |   17   |Possible range of opponent's hand, meaningful for ThresholdAgent, else 'AJKQT' |
 
         Args:
             state (dict): Original state from the game
@@ -272,7 +256,7 @@ class Env(object):
             obs['public_cards'] = ''.join(sorted(public_cards[0].rank + public_cards[1].rank))
         else:
             obs['public_cards'] = 'none'
-        obs['opponent_range'] = state['opponent_range'] # state feature used only by PolicyIterationAgent vs ThresholdAgent
+        obs['opponent_range'] = state['opponent_range'] # state feature useful only for PolicyIterationAgent vs ThresholdAgent
         extracted_state['obs'] = obs
 
         extracted_state['raw_obs'] = state

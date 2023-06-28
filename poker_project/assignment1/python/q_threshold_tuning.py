@@ -1,3 +1,6 @@
+''' Python script I used for understanding and manual tuning of Q Learning hyperparameters
+'''
+
 ###########################################################
 # Figure Utilities
 ###########################################################
@@ -58,7 +61,7 @@ print("Running Q Learning algorithm for Threshold Agent...")
 pretrained_model = None
 with open('q_threshold_model2.json') as json_file:
     pretrained_model = json.load(json_file)
-q_learning_agent = QLearningAgent(env.np_random, False, pretrained_model, is_learning = True, slow_decay = False)
+q_learning_agent = QLearningAgent(env.np_random, False, pretrained_model, is_learning = True, initial_epsilon = 0.1, initial_alpha = 0.1, epsilon_decay = -2/3, alpha_decay = -1/4)
 env.set_agents([
     q_learning_agent,
     threshold_agent,
@@ -74,7 +77,7 @@ print("Progress (%)")
 for i in range(num_of_games):
     print(round(i/num_of_games*100, 1),"\r", end="")
 
-    trajectories, payoffs = env.run(is_training=False)
+    trajectories, payoffs = env.run()
     agent_payoffs.append(payoffs[0])
 
 print("\nAverage payoffs:  ", sum(agent_payoffs[-num_of_games:])/num_of_games)
@@ -84,7 +87,7 @@ print("Progress (%)")
 for i in range(num_of_games):
     print(round(i/num_of_games*100, 1),"\r", end="")
 
-    trajectories, payoffs = env.run(is_training=False)
+    trajectories, payoffs = env.run()
     agent_payoffs.append(payoffs[0])
 
 print("\nAverage payoffs:  ", sum(agent_payoffs[-num_of_games:])/num_of_games)
@@ -94,7 +97,7 @@ print("Progress (%)")
 for i in range(num_of_games):
     print(round(i/num_of_games*100, 1),"\r", end="")
 
-    trajectories, payoffs = env.run(is_training=False)
+    trajectories, payoffs = env.run()
     agent_payoffs.append(payoffs[0])
 
 print("\nAverage payoffs:  ", sum(agent_payoffs[-num_of_games:])/num_of_games)
@@ -104,7 +107,7 @@ print("Progress (%)")
 for i in range(num_of_games):
     print(round(i/num_of_games*100, 1),"\r", end="")
 
-    trajectories, payoffs = env.run(is_training=False)
+    trajectories, payoffs = env.run()
     agent_payoffs.append(payoffs[0])
 
 print("\nAverage payoffs:  ", sum(agent_payoffs[-num_of_games:])/num_of_games)

@@ -23,7 +23,7 @@ class Player:
         Encode the state for the player
 
         Args:
-            public_cards (list): A list of public cards that seen by all the players
+            public_cards (list): A list of public cards seen by all players
             all_chips (int): The chips that all players have put in
 
         Returns:

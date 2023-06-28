@@ -11,7 +11,7 @@ class Card:
     suit = None
     rank = None
     valid_suit = ['S', 'H', 'D', 'C']
-    valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
+    valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'] # only 'T' to 'A' are used
 
     def __init__(self, suit, rank):
         ''' Initialize the suit and rank of a card
@@ -52,7 +52,7 @@ class Card:
         return self.suit+self.rank
     
     def rank_to_index(self):
-        ''' Get the coresponding number of a rank.
+        ''' Get the corresponding number of a rank.
 
         Args:
             rank(str): rank stored in Card object
@@ -109,13 +109,13 @@ class Card:
                 lines[8].append('└─────────┘')
             else:
                 if isinstance(card, Card):
-                    elegent_card = Card.elegent_form(card.suit + card.rank)
+                    elegant_card = Card.elegant_form(card.suit + card.rank)
                 else:
-                    elegent_card = Card.elegent_form(card)
-                suit = elegent_card[0]
-                rank = elegent_card[1]
-                if len(elegent_card) == 3:
-                    space = elegent_card[2]
+                    elegant_card = Card.elegant_form(card)
+                suit = elegant_card[0]
+                rank = elegant_card[1]
+                if len(elegant_card) == 3:
+                    space = elegant_card[2]
                 else:
                     space = ' '
 
@@ -133,14 +133,14 @@ class Card:
             print ('   '.join(line))
 
     @staticmethod
-    def elegent_form(card):
-        ''' Get a elegent form of a card string
+    def elegant_form(card):
+        ''' Get a elegant form of a card string
 
         Args:
             card (string): A card string
 
         Returns:
-            elegent_card (string): A nice form of card
+            elegant_card (string): A nice form of card
         '''
         suits = {'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣','s': '♠', 'h': '♥', 'd': '♦', 'c': '♣' }
         rank = 'T' if card[1] == '10' else card[1]

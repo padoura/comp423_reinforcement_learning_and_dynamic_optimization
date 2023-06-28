@@ -51,14 +51,7 @@ class Game:
         ''' Initialize the class Game
         '''
         self.allow_step_back = allow_step_back
-        self.np_random = np.random.RandomState()
-        ''' big/small blind
-        # Some configarations of the game
-
-        # Raise amount and allowed times
-        '''
-        # Some configarations of the game
-        # These arguments can be specified for creating new games
+        # self.np_random = np.random.RandomState() # commented out because it is initialized externally by Env class
 
         # Small blind and big blind
         self.small_blind = 0.5
@@ -95,7 +88,7 @@ class Game:
         # Prepare for the first round
         for i in range(self.num_players):
             self.players[i].hand.append(self.dealer.deal_card())
-        # Randomly choose a small blind and a big blind
+        # Randomly choose a small blind (first) and a big blind (second player)
         s = self.np_random.randint(0, self.num_players)
         b = (s + 1) % self.num_players
         self.players[b].position = 'second'
@@ -118,7 +111,7 @@ class Game:
         # Count the round. There are 2 rounds in each game.
         self.round_counter = 0
 
-        # Save the hisory for stepping back to the last state.
+        # Save the history for stepping back to the last state.
         self.history = []
 
         state = self.get_state(self.game_pointer)
@@ -129,7 +122,7 @@ class Game:
         ''' Get the next state
 
         Args:
-            action (str): a specific action. (call, raise, fold, or check)
+            action (str): a specific action. (bet, raise, fold, or check)
 
         Returns:
             (tuple): Tuple containing:
@@ -194,7 +187,7 @@ class Game:
         if sum(alive_players) == 1:
             return True
 
-        # If all rounds are finshed
+        # If all rounds are finished
         if self.round_counter >= 2:
             return True
         return False
@@ -247,12 +240,13 @@ class Game:
         range_frequencies = {}
         range_probabilities = {}
         
+        # initializing players and mocking chips for simulated rewards
         my_player = Player(0)
         my_player.in_chips = 0.5
         opposing_player = Player(1)
         opposing_player.in_chips = 0.5
 
-        for my_hand in deck:
+        for my_hand in deck: # check all states for each possible card in hand
             my_player.hand = [my_hand]
             flop_frequencies[my_hand.rank] = {}
             tie_frequencies[my_hand.rank] = {}
@@ -260,23 +254,23 @@ class Game:
             loss_frequencies[my_hand.rank] = {}
             total_opposing_frequencies[my_hand.rank] = {}
 
-            for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES:
+            for preflop_opponent_range in Game.POSSIBLE_OPPONENT_RANGES: # calculation of conditional probabilities given our current knowledge of the opponent's hand
                 if preflop_opponent_range not in flop_frequencies[my_hand.rank]:
                     flop_frequencies[my_hand.rank][preflop_opponent_range] = {}
-                    for opponent_hand in preflop_opponent_range:
+                    for opponent_hand in preflop_opponent_range: # for each possible rank in opponent's hand
                         possibly_removed_cards = list(filter(lambda card: card.rank == opponent_hand, deck))
-                        for removed_card in possibly_removed_cards:
+                        for removed_card in possibly_removed_cards: # we know the rank of the opponent's hand, but not the suit, calculate for all possible suits
                             remaining_deck = list(filter(lambda card: card != removed_card, deck))
                             for public_card1 in remaining_deck:
                                 if my_hand != public_card1:
-                                    for public_card2 in remaining_deck:
+                                    for public_card2 in remaining_deck: # count all possible public card ranks to calculate their conditional probabilities of appearing
                                         if my_hand != public_card2 and public_card1 != public_card2:
                                             public_hands = [ public_card1, public_card2 ]
                                             hand = ''.join(sorted(public_card1.rank + public_card2.rank))
                                             try_key_initialization(flop_frequencies[my_hand.rank][preflop_opponent_range], hand, 0)
                                             flop_frequencies[my_hand.rank][preflop_opponent_range][hand] += 1
 
-            for public_card1 in deck:
+            for public_card1 in deck: # Similarly as above, given our hand, opponent's range, and public cards, count all possible game judging scenarios (if no fold happens)
                 if my_hand != public_card1:
                     for public_card2 in deck:
                         if my_hand != public_card2 and public_card1 != public_card2:
@@ -306,6 +300,7 @@ class Game:
                                             else:
                                                 loss_frequencies[my_hand.rank][hand][possible_hand_range] += 1
         
+        # convert absolute frequencies to probabilities
         for hand in total_opposing_frequencies:
             win_probabilities[hand] = {}
             loss_probabilities[hand] = {}
@@ -316,6 +311,7 @@ class Game:
                     win_probabilities[hand][public_cards][possible_hand_range] = win_frequencies[hand][public_cards][possible_hand_range] / total_opposing_frequencies[hand][public_cards][possible_hand_range]
                     loss_probabilities[hand][public_cards][possible_hand_range] = loss_frequencies[hand][public_cards][possible_hand_range] / total_opposing_frequencies[hand][public_cards][possible_hand_range]
 
+        # convert absolute frequencies to probabilities
         for hand in flop_frequencies:
             flop_probabilities[hand] = {}
             for preflop_opponent_range in flop_frequencies[hand]:
@@ -323,6 +319,8 @@ class Game:
                 for public_key in flop_frequencies[hand][preflop_opponent_range]:
                     flop_probabilities[hand][preflop_opponent_range][public_key] = flop_frequencies[hand][preflop_opponent_range][public_key] / sum(flop_frequencies[hand][preflop_opponent_range].values())
 
+        # Given our hand, no public cards, and current opponent range, calculate frequency of belonging to a new opponent range
+        # Probablity is 1 if new range is same/superset of the old one, and <1 if it is a subset, 0 for incompatible ranges
         for my_hand in deck:
             range_frequencies[my_hand.rank] = {}
             range_frequencies[my_hand.rank]['none'] = {}
@@ -334,6 +332,7 @@ class Game:
                         if opponent_hand != my_hand and opponent_hand.rank in preflop_opponent_range and opponent_hand.rank in new_opponent_range:
                             range_frequencies[my_hand.rank]['none'][preflop_opponent_range][new_opponent_range] += 1
 
+        # Do the same as above for all possible public hand combinations
         for my_hand in deck:
             for public_card1 in deck:
                 if my_hand != public_card1:
@@ -349,6 +348,7 @@ class Game:
                                         if opponent_hand != my_hand and opponent_hand != public_card1 and opponent_hand != public_card2 and opponent_hand.rank in preflop_opponent_range and opponent_hand.rank in new_opponent_range:
                                             range_frequencies[my_hand.rank][public_cards][preflop_opponent_range][new_opponent_range] += 1        
 
+        # convert absolute frequencies to probabilities
         for hand in range_frequencies:
             range_probabilities[hand] = {}
             for public_cards in range_frequencies[hand]:

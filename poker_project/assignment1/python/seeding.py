@@ -1,3 +1,6 @@
+''' Seeding utilities adapted from rlcard
+'''
+
 #The MIT License
 #
 #Copyright (c) 2020 DATA Lab at Texas A&M University

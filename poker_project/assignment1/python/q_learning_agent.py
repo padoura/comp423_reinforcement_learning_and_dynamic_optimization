@@ -7,33 +7,33 @@ class QLearningAgent:
     ''' An agent following the optimal policy returned by Q-Learning algorithm
     '''
 
-    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True, slow_decay = True):
+    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True, initial_epsilon = 1.0, initial_alpha = 1.0, epsilon_decay = -1/4, alpha_decay = -1/4):
         self.np_random = np_random
         self.print_enabled = print_enabled
         self.use_raw = True
         self.model = pretrained_model if pretrained_model != None else { 'Q': {}, 'episode_num': 0, 'policy': {}}
         self.is_learning = is_learning
         self.gamma = 1.0
-        self.slow_decay = slow_decay
-        self.initial_epsilon = 1.0 if self.slow_decay else 0.1
+        # self.initial_epsilon = 1.0 if self.slow_decay else 0.1
+        self.initial_epsilon = initial_epsilon
+        self.epsilon_decay = epsilon_decay
         self._update_epsilon()
-        self.initial_alpha = 1.0 if self.slow_decay else 0.1
+        # self.initial_alpha = 1.0 if self.slow_decay else 0.1
+        self.initial_alpha = initial_alpha
+        self.alpha_decay = alpha_decay
         self._update_alpha()
 
     def _update_epsilon(self):
-        if self.slow_decay:
-            self.epsilon = self.initial_epsilon if self.model['episode_num'] == 0 else self.initial_epsilon*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_random_tuning.py
-        else:
-            self.epsilon = self.initial_epsilon if self.model['episode_num'] == 0 else self.initial_epsilon*self.model['episode_num']**(-2/3) # vs threshold agent, manually selected based on results of q_threshold_tuning.py
-
+        ''' Exponential decay over time
+        '''
+        self.epsilon = self.initial_epsilon if self.model['episode_num'] == 0 else self.initial_epsilon*self.model['episode_num']**(self.epsilon_decay)
     def _update_alpha(self):
-        if self.slow_decay:
-            self.alpha = self.initial_alpha if self.model['episode_num'] == 0 else self.initial_alpha*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_random_tuning.py
-        else:
-            self.alpha = self.initial_alpha if self.model['episode_num'] == 0 else self.initial_alpha*self.model['episode_num']**(-1/4) # vs threshold agent, manually selected based on results of q_threshold_tuning.py
+        ''' Exponential decay over time
+        '''
+        self.alpha = self.initial_alpha if self.model['episode_num'] == 0 else self.initial_alpha*self.model['episode_num']**(self.alpha_decay)
 
     def step(self, state):
-        ''' The steps of a Q-learning algorithm episode
+        ''' Choose action for next step of Q Learning Algorithm using an e-greedy approach
 
         Args:
             state (dict): A dictionary that represents the current state
@@ -49,7 +49,7 @@ class QLearningAgent:
         return action
 
     def eval_step(self, states, action_history, payoff = None):
-        ''' Method only needed for online learning
+        ''' Evaluation of Q values and best policy per state so far
         '''
         new_state = states[-1]
         if len(states) > 1:
@@ -78,7 +78,7 @@ class QLearningAgent:
                     self.model['episode_num'] += 1
                     self._update_epsilon()
                     self._update_alpha()
-                self.model['policy'][old_state_key] = max(Q[old_state_key], key=Q[old_state_key].get)
+                self.model['policy'][old_state_key] = max(Q[old_state_key], key=Q[old_state_key].get) # update policy for previous state based on new Q values
 
     def _print_state(self, state, action_record):
         ''' Print out the state
@@ -90,10 +90,6 @@ class QLearningAgent:
         if len(action_record) > 0:
             print('>> Player', action_record[-1][0], 'chooses', action_record[-1][1])
 
-        # print('\n=============== Community Card ===============')
-        # Card.print_card(state['public_cards'])
-        # print('===============   Your Hand    ===============')
-        # Card.print_card(state['hand'])
         print('===============     Chips      ===============')
         for i in range(len(state['all_chips'])):
             if i == state['current_player']:

@@ -1,4 +1,6 @@
 def try_key_initialization(dictionary, key, initial_value):
+    ''' Initialize key in dictionary only if it does not already exist
+    '''
     if key not in dictionary:
         dictionary[key] = initial_value
 

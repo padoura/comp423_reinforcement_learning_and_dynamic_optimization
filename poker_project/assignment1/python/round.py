@@ -68,16 +68,16 @@ class Round:
             raise Exception('{} is not legal action. Legal actions: {}'.format(action, self.get_legal_actions()))
 
         if action == 'bet':
-            self.raised[self.game_pointer] += self.raise_amount
+            self.raised[self.game_pointer] += self.raise_amount # add 1
             players[self.game_pointer].in_chips += self.raise_amount
-            self.not_raise_num += 1
+            self.not_raise_num += 1 # round ends if it reaches 2 (both players has played and final player chose bet/check)
 
         elif action == 'raise':
             diff = max(self.raised) - self.raised[self.game_pointer] + self.raise_amount
-            self.raised[self.game_pointer] += diff
+            self.raised[self.game_pointer] += diff # add 1 more than the opponent
             players[self.game_pointer].in_chips += diff
-            self.have_raised_num += 1
-            self.not_raise_num = 1
+            self.have_raised_num += 1 # only one raise allowed
+            self.not_raise_num = 1 # 1 player remains yet
 
         elif action == 'fold':
             players[self.game_pointer].status = 'folded'
@@ -88,7 +88,7 @@ class Round:
 
         self.game_pointer = (self.game_pointer + 1) % self.num_players
 
-        # Skip the folded players
+        # Skip the folded players (not needed for only 2 players)
         while players[self.game_pointer].status == 'folded':
             self.game_pointer = (self.game_pointer + 1) % self.num_players
 
@@ -104,7 +104,7 @@ class Round:
 
         full_actions = copy(Round.FULL_ACTIONS)
 
-        # If the number of raises already reaches the maximum number raises, we can not raise any more
+        # If the number of raises already reaches the maximum number of raises allowed, we cannot raise anymore
         # Moreover, player with small blind cannot raise
         if self.game_pointer == self.starting_game_pointer or self.have_raised_num >= self.allowed_raise_num:
             full_actions.remove('raise')
@@ -130,6 +130,6 @@ class Round:
         Returns:
             (boolean): True if the current round is over
         """
-        if self.not_raise_num >= self.num_players:
+        if self.not_raise_num >= self.num_players: # all players have finished bidding
             return True
         return False

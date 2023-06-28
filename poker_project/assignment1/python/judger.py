@@ -46,7 +46,7 @@ class Judger:
                     winners[max_index[0]] = 1
                     
         
-        # If non of the above conditions, the winner player is the one with the highest card rank
+        # If none of the above conditions, the winner player is the one with the highest card rank
         if sum(winners) < 1:
             max_rank = max(high_card_ranks)
             max_index = [i for i, j in enumerate(high_card_ranks) if j == max_rank]
