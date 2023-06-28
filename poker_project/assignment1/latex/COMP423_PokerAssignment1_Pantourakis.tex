@@ -1,0 +1,96 @@
+% Tροποποιημένο για ελληνικές αναφορές by Michail Pantourakis, 2016
+%Article Template
+%Author: Miguel Amador August 2011
+%Version: 2.0
+% Note: Use with associated 01.definitions.tex file
+%
+% This Template is based in the Template for Article for Physics Thesis by J. Seixas
+%
+
+% Use latexmk -pdf -pvc <tex file>
+
+\documentclass[a4paper,11pt,oneside]{article}
+
+\usepackage{etex}
+
+\input{01.definitions}
+
+%
+% PDF Options
+%
+
+%\hypersetup{
+%             colorlinks=false,
+%             citecolor=red,
+%             breaklinks=true,
+%             bookmarksnumbered=true,
+%             bookmarksopen=true,
+%             pdftitle={},
+%             pdfauthor={Παντουράκης Μιχαήλ
+%},
+%             pdfsubject={},
+%             pdfcreator={Παντουράκης Μιχαήλ},
+%             pdfkeywords={Template, Latex, Article}}
+
+\date{Date submitted: 30 June 2023}
+
+
+\begin{document}
+
+\begin{spacing}{1}
+
+%\linespread{0.9}
+\addtolength{\parskip}{0.2mm}
+\addtolength{\topmargin}{-8mm}
+
+% Uncomment to use custom header and footer fields
+%\pagestyle{outras.pag}
+%\thispagestyle{primeira.pag}
+
+%
+% Title and author
+%
+\title{COMP423 - Reinforcement Learning and Dynamic Optimization \\
+	Poker Project Assignment 1 Report}
+\author{Pantourakis Michail AM 2015030185\\
+    School of Electrical and Computer Engineering\\
+	Technical University of Crete
+}
+
+\maketitle
+%
+%
+%
+
+%\begin{multicols}{1} %Uncomment to two column article (uncomment also at the end of the document)
+%\twocolumn %Set two column in new page
+
+
+%
+% Article Text Body 
+%
+
+% ...
+
+
+\input{content}
+
+%
+% Bibliography
+%
+
+%\begin{spacing}{1}
+\scriptsize
+%\begin{footnotesize}
+
+%\bibliographystyle{IEEEtran}
+%\bibliography{02.biblio}
+
+\printbibliography
+
+%\end{footnotesize}
+
+
+%\end{multicols}
+\end{spacing}
+\end{document}

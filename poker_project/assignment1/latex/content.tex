@@ -1,0 +1,100 @@
+\section{Introduction}
+
+\begin{itemize}
+\item project summary
+\item goals
+\end{itemize}
+
+\section{Environment}
+
+\begin{itemize}
+\item Simplified game and rules
+\item what was adapted from rlcard
+\item 2 opponent models
+\item State-action representation
+\item State space creation
+\end{itemize}
+
+\section{Model-based solution: Policy Iteration algorithm}
+
+\begin{itemize}
+\item Implementation
+\item Average Results
+\item Analysis of Optimal Policy per opponent
+\item Demonstration of optimality
+\end{itemize}
+
+\section{Model-free solution: Q Learning algorithm}
+
+\begin{itemize}
+\item Implementation
+\item Analysis of hyperparameter tuning 
+\item Average Results
+\item Convergence analysis
+\end{itemize}
+
+\section{Conclusion}
+
+\begin{itemize}
+\item Main point for game size \& performance of algorithms
+\item Suggested next steps/improvements
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+%--------------------------------------------------
+
+%In this report I analyze the performance of Multiplicative Weights (MW) algorithms in ``Experts'' and ``Adversarial Bandits'' environments. As an example, a normalized dataset of real traffic loads for $k=30$ servers and a duration of $T=7000$ rounds was provided. The goal of the algorithms is to predict and pick the least loaded server at each time round. 
+%
+%\subsection*{Part I}
+%
+%\subsubsection*{1.1 MW and hyperparameter values}
+%
+%The implementation between the MW variants has a shared base structure, varying only in the amount of information acquired per round (Experts vs Bandits environment) and how this assumption is then applied to updating the weights for the selection process.
+%
+%More specifically, for the Experts environment, the learning algorithm acquires the normalized load (loss) of every server at each round $t$. Following our lecture notes \footnote{lecture19, Expert\_Adv\_Bandit\_Lecture}, I implemented the updating algorithm and set the hyperparameter $\eta=\sqrt{\frac{\ln{k}}{{T}}}$, which theoretically gives sublinear regret over the horizon ($O(\sqrt{T\ln k})$).
+%
+%In regards to the Bandits' environment, the algorithm only gets the load of the selected server at round $t$. Following the respective analysis in our lecture notes \footnote{lecture20, Expert\_Adv\_Bandit\_Lecture}, we now have to set an exploration hyperparameter $\epsilon$, which is a balancing factor between exploration and exploitation. In this report, I present results for two values: 1) $\eta=\epsilon=\sqrt{\frac{\ln{k}}{{T}}}$ (titled ``explore less''), and 2) $\eta=\epsilon=\sqrt[\leftroot{-2}\uproot{2}3]{\frac{n\ln{k}}{{T}}}$ (titled ``explore more'').
+%
+%\subsubsection*{1.2 Experts vs Bandits}
+%
+%\figref{fig:1} shows the results of one realization per algorithm for $T=1000$ (Subfigures a-c) and $T=7000$ (Subfigures d-f). Subfigures (a,d) show the total loss accumulated at each round $t$, (b,e) show the cumulative regret at each $t$, and (c,f) show the average regret over $t$. For the calculation of regrets, I used the loss provided by picking the best server over the horizon (server i = 12 in both cases).
+%
+%Expectedly due to full observability, the Experts setup has the superior performance over both small and large horizon $T$. At $T=7000$ it seems it has reached a point where the cumulative regret no longer significantly increases. On the contrary, the adversarial bandits setup accumulates more regret over time, and still shows accumulation at the end of the horizon. Nevertheless, the curve for the algorithm with less exploration has a shape similar to that of Experts, which is indicative of the similar regret bound of $O(\sqrt{kT\ln k})$ (the extra $k$ term being the penalty of partial observability).
+%
+%\subsubsection*{1.3 Exploration with Bandits}
+%
+%Interesting observations are made by inspecting the behavior of the ``explore more'' adversarial bandits case. Since $\eta$ is also higher for this implementation, it is obvious that bad servers are more severely penalized, resulting in better server choices in the short term. However, since the exploration probability is higher too, the ``explore more'' Bandits variant eventually accumulates more regret than both the Experts and the ``explore less'' variants. While the ``explore more'' variant seems at a long-term disadvantage, we should factor in the purpose of this algorithm: high value of $\epsilon$ may lead to more bad options, but the reasoning behind it is that under an adversarial setting, these so-far bad options may turn out to be good. Therefore, we should expect this algorithm to adapt faster to sudden changes of the best server over time.
+%
+%\begin{figure}[htpb]
+%\renewcommand*\thesubfigure{\alph{subfigure}}
+%\centering
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/total_loss_30_1000}}
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/total_regret_30_1000}}
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/average_regret_30_1000}}\\
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/total_loss_30_7000}}
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/total_regret_30_7000}}
+%	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/average_regret_30_7000}}
+%\caption{Performance of Multiplicative Weights (MW) and Upper Confidence Bound (UCB) algorithms on predicting the least loaded server out of $k=30$ at every time round $t$. 
+%%Results of three MW algorithms are presented; one implementation assuming full observability of all servers' loads at each round $t$ (called ``Experts''), and two assuming observability only of the selected server (called ``Bandits''). For Bandits variants, effect of exploration parameter $\gamma$ is illustrated. Subfigures (a-c) and (c-f) show a realization for horizon $T=1000$ and $7000$ respectively. In both cases, the server $i=12$ was the least loaded for the respective duration.
+%}
+%\label{fig:1}
+%\end{figure}
+%
+%\subsection*{Part II}
+%
+%\subsubsection*{2.1 Modifications to UCB for losses instead of rewards}
+%
+%In this part, I adapted the UCB algorithm of programming assignment 1 to this assignment's problem. Since in assignment 1 the algorithm was maximizing rewards instead of minimizing losses, I simply negated the provided dataset values. As a result, no modification was required for the algorithm internally, and the algorithm simply maximized negative losses, which is equivalent to minimizing the losses (as positive values).
+%
+%\subsubsection*{2.2 UCB vs Bandits}
+%
+%As expected for adversarial bandits, UCB consistently exhibits the worst performance, which agrees with the theoretical linear regret bound. Nevertheless, for this particular dataset, it is clear that even UCB shows a curve saturation over time. If a particular server is consistently and/or significantly better than the others over the horizon, which seems to be the case for server $i=12$, then the environment is practically less ``adversarial'' and more ``stochastic'' in nature, and UCB will predictably perform better over time.
