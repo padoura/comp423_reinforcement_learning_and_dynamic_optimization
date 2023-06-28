@@ -408,3 +408,4 @@ TSWLatexianTemp*
 .vscode
 */latex/figures
 *test.py
+*.json
