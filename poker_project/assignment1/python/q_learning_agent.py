@@ -44,8 +44,8 @@ class QLearningAgent:
         if self.print_enabled: self._print_state(state['raw_obs'], state['action_record'])
         state_key = state['obs']['position'] + '_' + str(state['obs']['my_chips']) + '_' + str(state['obs']['other_chips']) + '_' + state['obs']['hand'] + '_' + state['obs']['public_cards'] + '_' + state['obs']['opponent_range']
         Q = self.model['Q']
-        ## Choose action from state using policy derived from Q and e-greedy
-        action = self.np_random.choice(state['raw_legal_actions']) if self.np_random.binomial(1, self.epsilon) == 1 else self.model['policy'][state_key]
+        ## Choose action from state using policy derived from Q and e-greedy (the latter only used for training)
+        action = self.np_random.choice(state['raw_legal_actions']) if self.is_learning and self.np_random.binomial(1, self.epsilon) == 1 else self.model['policy'][state_key]
         return action
 
     def eval_step(self, states, action_history, payoff = None):
