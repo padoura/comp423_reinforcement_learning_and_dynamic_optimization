@@ -1,28 +1,36 @@
-import numpy as np
-import json
-import os
 from utils import try_key_initialization
 
 class QLearningAgent:
     ''' An agent following the optimal policy returned by Q-Learning algorithm
     '''
 
-    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True, initial_epsilon = 1.0, initial_alpha = 1.0, epsilon_decay = -1/4, alpha_decay = -1/4):
+    def __init__(self, np_random, print_enabled, pretrained_model = None, is_learning = True, initial_epsilon = 1.0, initial_alpha = 1.0, epsilon_decay = -1/4, alpha_decay = -1/4, state_space = None):
+        self.explore_state_space = False # True allows dynamic exploration of state space
         self.np_random = np_random
         self.print_enabled = print_enabled
         self.use_raw = True
-        self.model = pretrained_model if pretrained_model != None else { 'Q': {}, 'episode_num': 0, 'policy': {}}
+        self._initialize_model(pretrained_model, state_space)
         self.is_learning = is_learning
         self.gamma = 1.0
-        # self.initial_epsilon = 1.0 if self.slow_decay else 0.1
         self.initial_epsilon = initial_epsilon
         self.epsilon_decay = epsilon_decay
         self._update_epsilon()
-        # self.initial_alpha = 1.0 if self.slow_decay else 0.1
         self.initial_alpha = initial_alpha
         self.alpha_decay = alpha_decay
         self._update_alpha()
 
+    def _initialize_model(self, pretrained_model, state_space):
+        if pretrained_model != None:
+            self.model = pretrained_model
+        elif state_space != None:
+            self.model = { 'Q': {}, 'episode_num': 0, 'policy': {}}
+            for state_key in state_space:
+                self.model['Q'][state_key] = {action: 0.0 for action in state_space[state_key]}
+                self.model['policy'][state_key] = self.np_random.choice(list(self.model['Q'][state_key].keys()))
+        else:
+            self.model = { 'Q': {}, 'episode_num': 0, 'policy': {}}
+            self.explore_state_space = True
+    
     def _update_epsilon(self):
         ''' Exponential decay over time
         '''
@@ -62,7 +70,7 @@ class QLearningAgent:
 
         ## initialize Q for a newly observed state
         Q = self.model['Q']
-        if payoff == None: # there is no need to store terminal states
+        if self.explore_state_space and payoff == None: # payoff != None is excluded anyway because there is no need to store terminal states
             try_key_initialization(Q, new_state_key, {action: 0.0 for action in new_state['raw_legal_actions']})
             try_key_initialization(self.model['policy'], new_state_key, new_state['raw_legal_actions'][0])
 
