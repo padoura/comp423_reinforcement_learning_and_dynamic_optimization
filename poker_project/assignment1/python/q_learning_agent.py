@@ -1,4 +1,4 @@
-from utils import try_key_initialization
+from utils import try_key_initialization, get_random_max_key
 
 class QLearningAgent:
     ''' An agent following the optimal policy returned by Q-Learning algorithm
@@ -79,14 +79,14 @@ class QLearningAgent:
             if old_state != None: # new state is not an initial state
                 latest_action = action_history[-1]
                 if payoff == None: # no reward received yet, considered as 0 and is thus omitted
-                    best_next_action = max(Q[new_state_key], key=Q[new_state_key].get)
+                    best_next_action = get_random_max_key(Q[new_state_key], self.np_random) # in case of ties, pick randomly
                     Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (self.gamma*Q[new_state_key][best_next_action] - Q[old_state_key][latest_action])
                 else: # reached terminal state, maximization term for further actions is 0 and is thus omitted
                     Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (payoff - Q[old_state_key][latest_action])
                     self.model['episode_num'] += 1
                     self._update_epsilon()
                     self._update_alpha()
-                self.model['policy'][old_state_key] = max(Q[old_state_key], key=Q[old_state_key].get) # update policy for previous state based on new Q values
+                self.model['policy'][old_state_key] = get_random_max_key(Q[old_state_key], self.np_random) # update policy for previous state based on new Q values, in case of ties, pick randomly
 
     def _print_state(self, state, action_record):
         ''' Print out the state
