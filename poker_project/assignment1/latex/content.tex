@@ -1,8 +1,8 @@
 \section{Introduction}
 
-A significant step towards understanding today's advancements in Reinforcement Learning (RL) is by first understanding the fundamental theory of Markov Decision Processes for modelling decision making problems and the ``exact'' model-based algorithms that optimally solve these problems. However, these approaches are limited by their requirement for complete knowledge of the environment (model). A major breakthrough in RL was thus the development of the Q Learning algorithm, the first model-free learning algorithm with guaranteed convergence to the optimal policy.
+A significant step towards understanding today's advancements in Reinforcement Learning (RL) is by first understanding the fundamental theory of Markov Decision Processes (MDP) for modelling decision making problems and the ``exact'' model-based algorithms that optimally solve these problems. However, these approaches are limited by their requirement for complete knowledge of the environment (model). A major breakthrough in RL was thus the development of the Q-learning algorithm, the first model-free learning algorithm with guaranteed convergence to the optimal policy.
 
-In this report I present my course project implementing these algorithms and analyzing their results on a simplified, ``toy'' version of poker. I will start by first establishing the rules of this simplified game, the opponents designed as part of the environment, my model representation and how I implemented all of them in Python. With the problem formulation being established, I will then continue with how I applied Policy Iteration (model-based) and Q Learning (model-free) algorithms to this problem, reporting key observations, and most importantly, analyzing their behavior due to the nature of this game and what theory predicts.
+In this report I present my course project implementing these algorithms and analyzing their ability to maximize earnings on a simplified, ``toy'' version of poker. I will start by first establishing the rules of this simplified game, the opponents designed as part of the environment, my model representation and how I implemented all of them in Python. With the problem formulation being established, I will then continue with how I applied Policy Iteration (model-based) and Q-learning (model-free) algorithms to this problem, reporting key observations, and most importantly, analyzing their behavior due to the nature of this game and what theory predicts.
 
 \section{Environment}
 
@@ -20,7 +20,7 @@ Assuming no player has folded until the end of round two, the winner is then dec
 
 \subsection{Opponents as part of the Environment}
 
-Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q Learning.
+Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q-learning.
 
 The first opponent, hereafter called \textit{Random agent}, is a completely randomized agent. Each time an action is required by it, it randomly picks -with equal probability- one of the actions allowed according to the game's current phase. Since the Random agent disregards any other card and opponent information, its opponent cannot infer any meaningful information from its actions.
 
@@ -28,12 +28,44 @@ The second opponent, named \textit{Threshold agent}, is a completely determinist
 
 +++ Add table
 
+\subsection{MDP and state-space representation}
+
+Before proceeding with the implementation and results of this work, careful formulation of the state-space representation is crucial. This representation should balance between two opposing ends: 1) be as complete as possible to capture all information required by the ``exact'' algorithms used here, 2) have the smallest size possible to reduce computational demands without sacrificing completeness. Table \ref{table:state-space} summarizes all features, also discussing both their necessity and how their value range was optimized.
+
+Each state of the MDP is coupled with its legal actions only. Each state-action pair is then linked to one or more possible transitions. Each transition is in turn characterized by: 1) its conditional probability (given the state-action pair), 2) the next state, 3) the associated reward (which for a loss is negative), and 4) terminal status (as boolean). Note that in Texas Hold'em games, all intermediate states have 0 reward, and only terminal states may have non-zero values (and 0 only in case of ties).
+
+\begin{table}[htpb]
+\centering
+\begin{tabular}{ |p{0.2\linewidth}|p{0.2\linewidth}|p{0.25\linewidth}|p{0.25\linewidth}| }
+\hline
+Feature & Value Range & Necessity & Minimization\\
+\hline
+\hline
+position & `first', `second' & Playing first or second has a direct consequence on the list of legal actions, and in case of Threshold agent, on the inferred hand range. & Unlike real poker, the simplification of retaining the same position for round 2 (flop) reduces number of possible transitions. \\
+\hline
+chips placed so far by currently acting player & `0.5', `1.5', `2.5', `3.5' & Knowing how many chips are already committed by player directly contributes to eventual rewards/losses. & `4.5' is omitted since it is only encountered in game terminal states\\
+\hline
+difference in chips of opposing player & `-1', `0', `1' & Knowing how many chips are already committed by opposing player efficiently merges information about eventual rewards/losses and current player's legal actions. & Since this is a limit hold'em game, this enumeration is smaller than using `0.5', `1.5', `2.5', `3.5', `4.5' directly.\\
+\hline
+rank of card in hand of currently acting player & `T', `J', `Q', `K', `A' & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & `none' if not revealed yet, else all 10 combinations (e.g. `AK', `AJ', `JK' etc.) & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation. Furthermore, the order of public cards does not matter in this variant, hence the alphabetical order offers a consistent way of reducing the number of states.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & Based on Table \ref{table:threshold-actions}: `AJKQT' (no information), `JQT', all 10 combinations of public hands, and all ranks (when the opposing hand's rank is surely known) & Needed only for Threshold agent, the strength of the opposing hand directly affects the player's chances of winning if no player folds until the end of round 2, and it also determines the probability of the Threshold agent's next action & When the opposing agent is not known to be the Threshold agent, only `AJKQT' is used. See above too.\\
+\hline
+\end{tabular}
+\caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
+\label{table:state-space}
+\end{table}
+
+\subsection{Implementation}
+
 \begin{itemize}
 \item State-action representation
 \item what was adapted from rlcard
 \end{itemize}
 
-\section{Model-based solution: Policy Iteration algorithm}
+\section{MDP-based solution: Policy Iteration algorithm}
 
 \begin{itemize}
 \item State space creation
@@ -43,7 +75,7 @@ The second opponent, named \textit{Threshold agent}, is a completely determinist
 \item Demonstration of optimality
 \end{itemize}
 
-\section{Model-free solution: Q Learning algorithm}
+\section{Model-free solution: Q-learning algorithm}
 
 \begin{itemize}
 \item Implementation
@@ -59,9 +91,46 @@ The second opponent, named \textit{Threshold agent}, is a completely determinist
 \item Suggested next steps/improvements
 \end{itemize}
 
-
-
-
+%\begin{center}
+%\begin{tabular}{ |c|c|}
+%\hline
+%δυαδική αναπαράσταση & $m$\\
+%\hline
+%\hline
+%0000 & 0\\
+%\hline
+%1000 & 1\\
+%\hline
+%1100 & 2\\
+%\hline
+%1110 & 3\\
+%\hline
+%1111 & 4\\
+%\hline
+%0111 & 5\\
+%\hline
+%0011 & 6\\
+%\hline
+%0001 & 7\\
+%\hline
+%0101 & 8\\
+%\hline
+%1101 & 9\\
+%\hline
+%1001 & 10\\
+%\hline
+%1011 & 11\\
+%\hline
+%1010 & 12\\
+%\hline
+%0010 & 13\\
+%\hline
+%0110 & 14\\
+%\hline
+%0100 & 15\\
+%\hline
+%\end{tabular}
+%\end{center}
 
 
 
