@@ -16,10 +16,17 @@ The game continues with a bidding round. Since this is a limit variant, either 1
 
 Assuming no player has folded until the end of round two, the winner is then decided by comparing their ``hand strength''. To reduce the number of possible combinations, only cards with rank `T', `J', `Q', `K', `A' (in ascending order) are available in deck (20 cards in total, 4 suits per rank). This simplification leaves only three winning combinations of hand and public cards: 1) 3 cards of the same kind (rank), 2) a pair of same kind, 3) no pairs. The rank of the pair or hand is used as a tie-breaker in rules (2) and (3). If all tie-breakers fail, the result is a tie and the tokens placed by both players are returned to them.
 
-+ Add table
++++ Add table
 
-\subsection{Player models}
+\subsection{Opponents as part of the Environment}
 
+Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q Learning.
+
+The first opponent, hereafter called \textit{Random agent}, is a completely randomized agent. Each time an action is required by it, it randomly picks -with equal probability- one of the actions allowed according to the game's current phase. Since the Random agent disregards any other card and opponent information, its opponent cannot infer any meaningful information from its actions.
+
+The second opponent, named \textit{Threshold agent}, is a completely deterministic agent, using only the strengths of its cards to determine its next action. Table \ref{table:threshold-actions} summarizes the action this agent will perform at any possible step. In contrast to the Random agent, each and every action of the Threshold agent provides information on the range of possible ranks held in its hand. Therefore, its predictable nature can be used against it by any agent trained against it.
+
++++ Add table
 
 \begin{itemize}
 \item State-action representation
