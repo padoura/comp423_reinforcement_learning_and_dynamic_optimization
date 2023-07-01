@@ -72,15 +72,14 @@ class QLearningAgent:
         Q = self.model['Q']
         if self.explore_state_space and payoff == None: # payoff != None is excluded anyway because there is no need to store terminal states
             try_key_initialization(Q, new_state_key, {action: 0.0 for action in new_state['raw_legal_actions']})
-            try_key_initialization(self.model['policy'], new_state_key, new_state['raw_legal_actions'][0])
+            try_key_initialization(self.model['policy'], new_state_key, self.np_random.choice(new_state['raw_legal_actions']))
 
         ## Update Q if learning is enabled and action was performed
         if self.is_learning:
             if old_state != None: # new state is not an initial state
                 latest_action = action_history[-1]
                 if payoff == None: # no reward received yet, considered as 0 and is thus omitted
-                    best_next_action = get_random_max_key(Q[new_state_key], self.np_random) # in case of ties, pick randomly
-                    Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (self.gamma*Q[new_state_key][best_next_action] - Q[old_state_key][latest_action])
+                    Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (self.gamma*max(Q[new_state_key].values()) - Q[old_state_key][latest_action])
                 else: # reached terminal state, maximization term for further actions is 0 and is thus omitted
                     Q[old_state_key][latest_action] = Q[old_state_key][latest_action] + self.alpha * (payoff - Q[old_state_key][latest_action])
                     self.model['episode_num'] += 1
