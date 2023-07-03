@@ -1,6 +1,6 @@
 \section{Introduction}
 
-A significant step towards understanding today's advancements in Reinforcement Learning (RL) is by first understanding the fundamental theory of Markov Decision Processes (MDP) for modelling decision making problems and the ``exact'' model-based algorithms that optimally solve these problems. However, these approaches are limited by their requirement for complete knowledge of the environment (model). A major breakthrough in RL was thus the development of the Q-learning algorithm, the first model-free learning algorithm with guaranteed convergence to the optimal policy.
+A significant step towards understanding today's advancements in Reinforcement Learning (RL) is by first understanding the fundamental theory of Markov Decision Processes (MDP) for modeling decision making problems and the ``exact'' model-based algorithms that optimally solve these problems. However, these approaches are limited by their requirement for complete knowledge of the environment (model). A major breakthrough in RL was thus the development of the Q-learning algorithm, the first model-free learning algorithm with guaranteed convergence to the optimal policy.
 
 In this report I present my course project implementing these algorithms and analyzing their ability to maximize earnings on a simplified, ``toy'' version of poker. I will start by first establishing the rules of this simplified game, the opponents designed as part of the environment, my model representation and how I implemented all of them in Python. With the problem formulation being established, I will then continue with how I applied Policy Iteration (model-based) and Q-learning (model-free) algorithms to this problem, reporting key observations, and most importantly, analyzing their behavior due to the nature of this game and what theory predicts.
 
@@ -19,6 +19,7 @@ Assuming no player has folded until the end of round two, the winner is then dec
 +++ Add table
 
 \subsection{Opponents as part of the Environment}
+\label{sec:opponents}
 
 Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q-learning.
 
@@ -60,10 +61,15 @@ rank of remaining possible opposing player cards in hand in alphabetical order &
 
 \subsection{Implementation}
 
-\begin{itemize}
-\item State-action representation
-\item what was adapted from rlcard
-\end{itemize}
+The entirety of this project was implemented in Python. All simulations and results reported here can be reproduced by running the Jupyter Notebook file \Verb|notebook.ipynb|.
+
+In regards to the environment implementation of this simple poker variant, I adapted the corresponding object-oriented game structure of the \href{https://rlcard.org/}{rlcard} Python library. Although this library may have already contained a functional environment for a number of poker games, this project's unique game rules demanded novel implementation of almost all classes.
+
+In summary, the \Verb|Card| class models each possible card of the game, while the \Verb|Dealer| is responsible for maintaining the deck and drawing cards. The \Verb|Judger| class contains the aforementioned rules of winning and is responsible for deciding the payoffs of each player (implemented as \Verb|Player| objects containing the state features known to each one). A \Verb|Round| object encapsulates all rules associated with player position, legal actions of currently active player, effects of selected actions, and round completion. The \Verb|Game| class is responsible for synchronizing all the aforementioned objects so that poker games can be executed as described.
+
+As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script).
+
+To run games, the \Verb|Env| class brings together the \Verb|Game| and opposing agent objects, is responsible for invoking the \Verb|Game| functions and extracting the complete current state representation. Finally, file \Verb|seeding.py| contains random seeding utility functions offered by rlcard, while a few generic utility functions are implemented in file \Verb|utils.py|.
 
 \section{MDP-based solution: Policy Iteration algorithm}
 
