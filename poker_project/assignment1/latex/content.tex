@@ -108,10 +108,15 @@ Inspecting the optimal policy for Random opponents (file \Verb|random_agent_opti
 
 Similarly, betting at the beginning of a round when playing first always grants you at least 1/3 chances of winning. Therefore, in 215 out of 230 such states the hand strength is enough to make betting is the optimal action, while the remaining 15 states are post-flop cases with very weak hands, where `check` is indeed optimal. The optimal policy is slightly more conservative (75 out of 300 such states where fold is better than bet) is in the last possible action of a game after a post-flop raise, since then the chances of winning are entirely based on hand strength. These are the only states where fold may be optimal.
 
-Finally, as an extra sanity check, I pitted the Random and Threshold agents against each other in the same experimental setup (5000000 games). Even though the Threshold agent is a more rational player and still beats the Random agent, the results (mean payoffs: 0.3093, std: 1.643) clearly shows that it is far from being the optimal policy. As we will see in the following sections (and Table \ref{table:random-results}), Policy Iteration indeed yielded the best policy out of all policies shown in this project.
+Finally, as an extra sanity check, I pitted the Random and Threshold agents against each other in the same experimental setup (5000000 games). Even though the Threshold agent is a more rational player and still beats the Random agent, the results (mean payoffs: 0.3093, std: 1.643) clearly shows that it is far from being the optimal policy.
 
 \subsubsection{Threshold opponent}
 
+Analyzing the optimal policy for Threshold opponents (file \texttt{threshold\_agent\_optimal\_policy .json}) is not so straightforward, since we can now ``read'' these opponents based on their actions, resulting in a larger state-space. Nevertheless, a few trends are also apparent here and are ultimately entirely based on card odds (even opponent actions), which in general results in a tighter playstyle when compared to the optimal policy for Random opponents. 
+
+Seeing a few examples: 1) Despite the weak hand, raise is optimal for state \Verb|second_0.5_0_T_AK_JQT|, since the Threshold opponent also has a weak hand and will fold more times than call (will call only if it has a Q). 2) For state \Verb|second_0.5_0_T_AJ_Q|, check is optimal because a loss is guaranteed; the opponent will never fold with a Q, and T loses against Q anyway. 3) For state \Verb|first_0.5_0_A_KQ_AK|, check is the best action because there is no chance for a Threshold agent to fold here, and the best we can do is a tie (if it has A). 4) For state \Verb|first_0.5_0_A_KK_JQT|, our win is guaranteed and betting may also increase our reward (if the Threshold agent has a Q will call).
+
+In conclusion, as we will see in the following sections (and Tables \ref{table:random-results}-\ref{table:threshold-results}), Policy Iteration indeed yielded the best policy per opponent out of all policies shown in this project.
 
 
 %\begin{itemize}
