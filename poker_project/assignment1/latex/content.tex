@@ -25,11 +25,12 @@ Two different types of ``static'' (non-adversarial) agents were created in this 
 
 The first opponent, hereafter called \textit{Random agent}, is a completely randomized agent. Each time an action is required by it, it randomly picks -with equal probability- one of the actions allowed according to the game's current phase. Since the Random agent disregards any other card and opponent information, its opponent cannot infer any meaningful information from its actions.
 
-The second opponent, named \textit{Threshold agent}, is a completely deterministic agent, using only the strengths of its cards to determine its next action. Table \ref{table:threshold-actions} summarizes the action this agent will perform at any possible step. In contrast to the Random agent, each and every action of the Threshold agent provides information on the range of possible ranks held in its hand. Therefore, its predictable nature can be used against it by any agent trained against it.
+The second opponent, named \textit{Threshold agent}, is a completely deterministic agent, using only the strengths of its cards to determine its next action. Table \ref{table:threshold-actions} summarizes the action this agent will perform at any possible step. In contrast to the Random agent, each and every action of the Threshold agent provides information on the range of possible ranks held in its hand. Therefore, its predictable nature can be used against it by any agent trained on it.
 
 +++ Add table
 
-\subsection{MDP and state-space representation}
+\subsection{MDP and state/action space representation}
+\label{sec:state-space}
 
 Before proceeding with the implementation and results of this work, careful formulation of the state-space representation is crucial. This representation should balance between two opposing ends: 1) be as complete as possible to capture all information required by the ``exact'' algorithms used here, 2) have the smallest size possible to reduce computational demands without sacrificing completeness. Table \ref{table:state-space} summarizes all features, also discussing both their necessity and how their value range was optimized.
 
@@ -67,28 +68,54 @@ In regards to the environment implementation of this simple poker variant, I ada
 
 In summary, the \Verb|Card| class models each possible card of the game, while the \Verb|Dealer| is responsible for maintaining the deck and drawing cards. The \Verb|Judger| class contains the aforementioned rules of winning and is responsible for deciding the payoffs of each player (implemented as \Verb|Player| objects containing the state features known to each one). A \Verb|Round| object encapsulates all rules associated with player position, legal actions of currently active player, effects of selected actions, and round completion. The \Verb|Game| class is responsible for synchronizing all the aforementioned objects so that poker games can be executed as described.
 
-As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script).
+As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script to try it out).
 
 To run games, the \Verb|Env| class brings together the \Verb|Game| and opposing agent objects, is responsible for invoking the \Verb|Game| functions and extracting the complete current state representation. Finally, file \Verb|seeding.py| contains random seeding utility functions offered by rlcard, while a few generic utility functions are implemented in file \Verb|utils.py|.
 
 \section{MDP-based solution: Policy Iteration algorithm}
 
-\begin{itemize}
-\item State space creation
-\item Implementation
-\item Average Results
-\item Analysis of Optimal Policy per opponent
-\item Demonstration of optimality
-\end{itemize}
+Prior to experimenting with a true learning algorithm in this game, we first want to acquire a clear understanding of the environment. As already mentioned, modeling the environment (the combination of game rules and opponent behavior) as an MDP enables us to solve the problem optimally with dynamic programming methods such as Policy Iteration. Therefore, I start this section by highlighting my Python implementations of the MDP described in Section \ref{sec:state-space}, for both Random and Threshold opponents. Next, I rationalize my choice of hyperparameter configuration for Policy Iteration, I continue with reporting the results of this algorithm, and finally conclude with an analysis of the yielded optimal policies.
+
+\subsection{MDP implementation}
+
+As shown in Table \ref{table:state-space}, a state is fully characterized by six features. Since my primary goal was to enhance readability of my implementation and results, I sacrificed memory usage efficiency by selecting a descriptive state representation using Python's dictionaries over lists. In particular, a two-level nested dictionary structure was formed, with state being the first level key, action being the second level key, and each state-action pair containing a list of all possible transitions (which are as described in Section \ref{sec:state-space}). Following Table \ref{table:state-space}, the syntax of state keys is {\small \Verb|{{position}}_{{my_chips}}_{{opponent_chips}}_{{hand}}_{{public_cards}}_{{opponent_range}}|}, \\ while the action values of Table \ref{table:legal-actions} were directly used as action keys.
+
+Since transition probabilities are entirely determined by 1) opponent action probabilities (opponent model), and 2) poker card probabilities (game rules), I needed to implement a way of calculating these odds for the unique poker variant of this project. Since the former is part of the game and irrespective of opponent models, I developed the function \Verb|get_transition_probabilities_for_cards()| in the Game class. This function returned a dictionary containing the odds of each card pairs (as ranks) being drawn in flop knowing our hand and our opponent's range (resulting file \Verb|win_probabilities.json|). Now given the public cards as well, this method also provides the odds of winning (file \\ \Verb|win_probabilities.json|) and losing (file \Verb|loss_probabilities.json|), with tie odds also being trivially calculated. Finally, resulting file \Verb|range_probabilities.json| includes the odds of the opponent having a certain card range given their current range and all other revealed cards.
+
+In regards to opponent action probabilities, these of course differ between Random and Threshold agents based on their definition in Section \ref{sec:opponents}. To this end, their calculation in both corresponding classes is part of function \Verb|calculate_state_space()|. With this function I programmatically calculate all possible state-action-transition combinations. In the case of Random agent this function yielded 1000 non-terminal states and 2230 non-terminal state-action pairs (see file \Verb|random_agent_state_space.json|), whereas for Threshold Agent the state space was larger with 2075 non-terminal states and 4500 non-terminal state-action pairs (see file \texttt{threshold\_agent\_state\_space .json}). The reason behind this difference is due to inference of the Threshold opponent's possible range of hands based on its actions, whereas we cannot infer any information based on a Random opponent's actions (see last feature of Table \ref{table:state-space}).
+
+\subsection{Algorithm Implementation and hyperparameter configuration}
+
+\subsection{Results}
+
+\subsection{Optimal policy analysis}
+
+
+
+%\begin{itemize}
+%\item State space creation
+%\item Implementation
+%\item Average Results
+%\item Analysis of Optimal Policy per opponent
+%\item Demonstration of optimality
+%\end{itemize}
 
 \section{Model-free solution: Q-learning algorithm}
 
-\begin{itemize}
-\item Implementation
-\item Analysis of hyperparameter tuning 
-\item Average Results
-\item Convergence analysis
-\end{itemize}
+\subsection{Implementation}
+
+\subsection{Hyperparameter configuration}
+
+\subsection{Results}
+
+\subsection{Convergence analysis}
+
+%\begin{itemize}
+%\item Implementation
+%\item Analysis of hyperparameter tuning 
+%\item Average Results
+%\item Convergence analysis
+%\end{itemize}
 
 \section{Conclusion}
 
