@@ -137,7 +137,7 @@ Having set the MDP and hyperparameters, we can now evaluate the performance of P
 
 First, as expected, convergence is rapidly achieved. Although speed of convergence depends on policy initialization which is random, most of the times only 3 iterations of policy evaluation and improvement are enough to reach the desired level of convergence (2-4 has been observed in numerous tries). Note that lowering $\gamma$ a bit had only a effect on the resulting optimal policies, nevertheless this small effect was towards the expected direction of more aggressive playstyle (more bets/raises as optimal policies). These results were consistent against both Random and Threshold opponents.
 
-Concerning the average payoffs achieved by the generated optimal policy per opponent, I tested them against their intended opponent in 5000000 simulated games. Expectedly, the Random agent was proven to be the worst player, providing a much larger margin for earnings (mean: 0.8761 tokens, standard deviation: 2.127 tokens) when compared to the more `rational' Threshold agent (mean: 0.2251, std: 1.467). 
+Concerning the average payoffs achieved by the generated optimal policy per opponent, I tested them against their intended opponent in $5\cdot10^6$ simulated games. Expectedly, the Random agent was proven to be the worst player, providing a much larger margin for earnings (mean: 0.8761 tokens, standard deviation: 2.127 tokens) when compared to the more `rational' Threshold agent (mean: 0.2251, std: 1.467). 
 
 \subsection{Optimal policy analysis}
 
@@ -149,7 +149,7 @@ Inspecting the optimal policy for Random opponents (file \Verb|random_agent_opti
 
 Similarly, betting at the beginning of a round when playing first always grants you at least 1/3 chances of winning. Therefore, in 215 out of 230 such states the hand strength is enough to make betting is the optimal action, while the remaining 15 states are post-flop cases with very weak hands, where `check` is indeed optimal. The optimal policy is slightly more conservative (75 out of 300 such states where fold is better than bet) is in the last possible action of a game after a post-flop raise, since then the chances of winning are entirely based on hand strength. These are the only states where fold may be optimal.
 
-Finally, as an extra sanity check, I pitted the Random and Threshold agents against each other in the same experimental setup (5000000 games). Even though the Threshold agent is a more rational player and still beats the Random agent, the results (mean payoffs: 0.3093, std: 1.643) clearly shows that it is far from being the optimal policy.
+Finally, as an extra sanity check, I pitted the Random and Threshold agents against each other in the same experimental setup ($5\cdot10^6$ games). Even though the Threshold agent is a more rational player and still beats the Random agent, the results (mean payoffs: 0.3093, std: 1.643) clearly shows that it is far from being the optimal policy.
 
 \subsubsection{Threshold opponent}
 
@@ -165,11 +165,17 @@ In conclusion, as we will see in the following sections (and in Tables \ref{tabl
 
 \subsection{Implementation}
 
-For the purposes of this project I chose to implement the Q-learning algorithm shown in the coursebook of Sutton, Barto, chapter 6.5. In order to be able to evaluate the testing (and not training) performance of the Q-learning agent, I made the activation of both the temporal difference control and the $\epsilon$-greedy steps configurable.
+For the purposes of this project I chose to implement the Q-learning algorithm shown in the coursebook of Sutton, Barto, chapter 6.5. In order to be able to evaluate the testing (and not training) performance of the Q-learning agent, I made the activation of both the temporal difference control (update) and the $\epsilon$-greedy steps configurable. Furthermore, if multiple actions are tied with the maximum (over all actions) $Q$ value, I chose to implement random action selection, which I also applied for initialization, to prevent tie breaking/initialization effects on convergence.
 
 \subsection{Hyperparameter configuration}
 
+The implemented Q-learning algorithm has three hyperparameters: 1) the discount factor $\gamma$ (which I simply set to 1 for the same reasons I did for Policy Iteration), 2) the $\epsilon$ for $\e$-greedy state-action exploration, and 3) the learning rate $\alpha$. To guarantee convergence in the limit, I set both $\epsilon$ and $\alpha$ using an exponential decay function over the number of training episodes (games) $t>0$, as $\epsilon = \epsilon_0 t^{\epsilon_d}$ and $\alpha = \alpha_0 t^{\alpha_d}$, where $\epsilon_0$, $\alpha_0$ are the initial values (set for $t=0$ as well), and $\epsilon_d$, $\alpha_d$ are the corresponding decay rates. 
+
 \subsection{Results}
+
+To exhibit the effects of hyperparameter values on Q-learning performance, I set up the following experimental design: using a set of values for $\epsilon_0$, $\alpha_0$, $\epsilon_d$ and $\alpha_d$ as a basis, I trained the Q-learning agent with $3\cdot10^6$ games (as training set) versus its opponent. Subsequently, I used the pretrained agent against the same opponent in another $10^6$ games (as test set). I then repeated this process 5 times to measure the average testing performance of the Q-learning agent out of $5\cdot10^6$ games in total. Finally, I repeated the same process with 4 more sets of hyperparameter values, every time changing only a single parameter.
+
+In the following subsections I present the results of these experiments against the Random and Threshold agents.
 
 \subsubsection{Random opponent}
 
