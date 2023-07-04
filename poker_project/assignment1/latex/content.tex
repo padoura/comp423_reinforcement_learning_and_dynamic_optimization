@@ -92,6 +92,12 @@ Policy Iteration offers a pair of hyperparameters: 1) the convergence error, and
 
 \subsection{Results}
 
+Having set the MDP and hyperparameters, we can now evaluate the performance of Policy Iteration both in terms of convergence to the optimal policy and of average payoffs per game.
+
+First, as expected, convergence is rapidly achieved. Although speed of convergence depends on policy initialization which is random, most of the times only 3 iterations of policy evaluation and improvement are enough to reach the desired level of convergence (2-4 has been observed in numerous tries). Note that lowering $\gamma$ a bit had only a effect on the resulting optimal policies, nevertheless this small effect was towards the expected direction of more aggressive playstyle (more bets/raises as optimal policies). These results were consistent against both Random and Threshold opponents.
+
+Concerning the average payoffs achieved by the generated optimal policy per opponent, I tested them against their intended opponent in 5000000 simulated games. Expectedly, the Random agent was proven to be the worst player, providing a much larger margin for earnings (mean: 0.8761 tokens, standard deviation: 2.127 tokens) when compared to the more `rational' Threshold agent (mean: 0.2251, std: 1.467). 
+
 \subsection{Optimal policy analysis}
 
 
