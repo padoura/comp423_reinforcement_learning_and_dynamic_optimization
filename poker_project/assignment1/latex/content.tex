@@ -18,7 +18,7 @@ Assuming no player has folded until the end of round two, the winner is then dec
 
 +++ Add table
 
-\subsection{Opponents as part of the Environment}
+\subsection{Opponents as part of the environment}
 \label{sec:opponents}
 
 Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q-learning.
@@ -84,7 +84,11 @@ Since transition probabilities are entirely determined by 1) opponent action pro
 
 In regards to opponent action probabilities, these of course differ between Random and Threshold agents based on their definition in Section \ref{sec:opponents}. To this end, their calculation in both corresponding classes is part of function \Verb|calculate_state_space()|. With this function I programmatically calculate all possible state-action-transition combinations. In the case of Random agent this function yielded 1000 non-terminal states and 2230 non-terminal state-action pairs (see file \Verb|random_agent_state_space.json|), whereas for Threshold Agent the state space was larger with 2075 non-terminal states and 4500 non-terminal state-action pairs (see file \texttt{threshold\_agent\_state\_space .json}). The reason behind this difference is due to inference of the Threshold opponent's possible range of hands based on its actions, whereas we cannot infer any information based on a Random opponent's actions (see last feature of Table \ref{table:state-space}).
 
-\subsection{Algorithm Implementation and hyperparameter configuration}
+\subsection{Algorithm implementation and hyperparameter configuration}
+
+For the development of Policy Iteration agent, I adapted the example for the Frozen Lake environment provided in class. Most of the provided implementation remained unchanged, however since I decided to use dictionaries for the representation of state-action-transitions, I had to replace the functionality meant for tabular representations with an equivalent for dictionaries.
+
+Policy Iteration offers a pair of hyperparameters: 1) the convergence error, and 2) the discount factor $\gamma$. My chosen values for both hyperparameters was supported by the episodic nature of limit poker, since all games terminate after a very limited number of state transitions. Therefore, for convergence error I chose the default low value of $10^{-10}$ (since fast convergence is expected). Furthermore, I also defaulted $\gamma=1$. Choosing a lower value for $\gamma$ in poker is expected to motivate a more aggressive gameplay, trying to winning games as fast as possible by forcing opponents to fold. However, I did not go that route since 1) rewards are equally important regardless of how many steps a game lasted, and 2) longer lasting games may offer more opportunities for increased rewards, especially against simple opponents that have a high chance of choosing subpar actions.
 
 \subsection{Results}
 
