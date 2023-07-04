@@ -116,24 +116,23 @@ Analyzing the optimal policy for Threshold opponents (file \texttt{threshold\_ag
 
 Seeing a few examples: 1) Despite the weak hand, raise is optimal for state \Verb|second_0.5_0_T_AK_JQT|, since the Threshold opponent also has a weak hand and will fold more times than call (will call only if it has a Q). 2) For state \Verb|second_0.5_0_T_AJ_Q|, check is optimal because a loss is guaranteed; the opponent will never fold with a Q, and T loses against Q anyway. 3) For state \Verb|first_0.5_0_A_KQ_AK|, check is the best action because there is no chance for a Threshold agent to fold here, and the best we can do is a tie (if it has A). 4) For state \Verb|first_0.5_0_A_KK_JQT|, our win is guaranteed and betting may also increase our reward (if the Threshold agent has a Q will call).
 
-In conclusion, as we will see in the following sections (and Tables \ref{table:random-results}-\ref{table:threshold-results}), Policy Iteration indeed yielded the best policy per opponent out of all policies shown in this project.
-
-
-%\begin{itemize}
-%\item State space creation
-%\item Implementation
-%\item Average Results
-%\item Analysis of Optimal Policy per opponent
-%\item Demonstration of optimality
-%\end{itemize}
+In conclusion, as we will see in the following sections (and in Tables \ref{table:random-results}-\ref{table:threshold-results}), Policy Iteration indeed yielded the best policy per opponent out of all policies shown in this project.
 
 \section{Model-free solution: Q-learning algorithm}
 
+++ intro
+
 \subsection{Implementation}
+
+For the purposes of this project I chose to implement the Q-learning algorithm shown in the coursebook of Sutton, Barto, chapter 6.5. In order to be able to evaluate the testing (and not training) performance of the Q-learning agent, I made the activation of both the temporal difference control and the $\epsilon$-greedy steps configurable.
 
 \subsection{Hyperparameter configuration}
 
 \subsection{Results}
+
+\subsubsection{Random opponent}
+
+\subsubsection{Threshold opponent}
 
 \subsection{Convergence analysis}
 
