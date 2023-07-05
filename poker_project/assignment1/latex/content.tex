@@ -177,6 +177,17 @@ To exhibit the effects of hyperparameter values on Q-learning performance, I set
 
 In the following subsections I present the results of these experiments against the Random and Threshold agents.
 
+\begin{figure}[htpb]
+\renewcommand*\thesubfigure{\alph{subfigure}}
+\centering
+	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/moving_averages_random}}
+	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/moving_averages_threshold}}
+	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/convergence_rate}}
+\caption{Results of the first training instances per opponent and hyperparameter value set. (a)-(b) Moving average of payoffs (per $10^5$ games) against Random and Threshold agents respectively. (c) Similarity of policy returned by Q-learning compared to Policy Iteration, as a convergence rate indicator. Tables \ref{table:random-results}-\ref{table:threshold-results} show the values used for each legend entry.
+}
+\label{fig:1}
+\end{figure}
+
 \subsubsection{Random opponent}
 
 \subsubsection{Threshold opponent}
