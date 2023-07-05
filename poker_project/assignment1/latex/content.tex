@@ -123,18 +123,17 @@ Since the effect of $\epsilon$-greedy exploration does not allow us to understan
 
 \subsubsection{Threshold opponent}
 
-+++ TODO
+Similar to Policy Iteration, dealing with the Threshold opponent case was more complicated. Since the assumption of this experiment for Q-learning was no prior knowledge of the opponent type, I could not utilize the aforementioned specialized state space of Threshold opponents (developed for Policy Iteration) where inference of possible opponent hand is maintained. Consequently, I had to employ the generally applicable states used for Random opponents.
 
-%\begin{itemize}
-%\item Implementation
-%\item Analysis of hyperparameter tuning 
-%\item Average Results
-%\item Convergence analysis
-%\end{itemize}
+Interestingly, inspecting the test results of Q-learning against a Threshold opponent (Table \ref{table:threshold-results}) reveals that this method could never reach the optimized rewards achieved by Policy Iteration, with the best configuration resulting in a mean value of 0.1623 tokens per game (compared to 0.2252 of Policy Iteration). As already mentioned, Q-learning is expected to converge (in the limit) to the optimal policy. Although this result may seem contradictory to theory, it can be argued that either this is indeed the optimal policy when using the reduced state space instead of the specialized one for Threshold opponents, or more training games (and better hyperparameter configuration) is required to achieve the true optimal.
+
+Finally, in regards to hyperparameter tuning, we can see that extending $\epsilon$-greedy exploration actually decreased average rewards in testing phase. Furthermore, using large learning rates, even briefly at early episodes (unlike Random opponents), was enough to yield worse testing performance. Figure \ref{fig:1}(b) shows the trend followed by one training instance of each configuration. The three configurations that used larger learning rates appear to converge rapidly and prematurely ($<5\cdot10^5$ games), whereas the other two illustrated much slower convergence speed ($~10^6$ games).
+
+generated suboptimal testing results appear to converge rapidly and prematurely. In contrast, the best Q-learning 
 
 \section{Conclusion}
 
-This course project was an excellent introduction to the basic principles of Reinforcement Learning and problem formulation. Designing and programming the environment for a novel poker variant I had the opportunity to hone my skills in modeling state-action space abstractions suitable for learning algorithms to utilize. Furthermore, implementing both Policy Iteration and Q-learning algorithms allowed me to understand the intricacies of their theory in action. Having full knowledge of the opposing agent's playstyle, Policy Iteration quickly solved the problem optimally. Even without this knowledge though, Q-learning proved capable of achieving similar performances after a relatively short number of training episodes. However, when the state-space differed due to the unknown nature of the opponent, Q-learning was not able to achieve the reward levels achieved by Policy Iteration, hinting that some kind of modeling assumptions and approximations may still be required in such cases.
+This course project was an excellent introduction to the basic principles of Reinforcement Learning and problem formulation. By designing and programming the environment for a novel poker variant I had the opportunity to hone my skills in modeling state-action space abstractions suitable for learning algorithms to utilize. Furthermore, implementing both Policy Iteration and Q-learning algorithms allowed me to understand the intricacies of their theory in action. Having full knowledge of the opposing agent's playstyle, Policy Iteration quickly solved the problem optimally. Even without this knowledge though, Q-learning proved capable of achieving similar performances after a relatively short number of training episodes. However, when the state-space differed due to the unknown nature of the opponent, Q-learning was not able to achieve the reward levels achieved by Policy Iteration, hinting that some kind of modeling assumptions and approximations may still be beneficial in practice to maximize rewards.
 
 \clearpage
 
