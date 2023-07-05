@@ -1,0 +1,148 @@
+''' Card class adapted from rlcard
+'''
+class Card:
+    '''
+    Card stores the suit and rank of a single card
+
+    Note:
+        The suit variable in a standard card game should be one of [S, H, D, C] meaning [Spades, Hearts, Diamonds, Clubs]
+        Similarly the rank variable should be one of [A, 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K]
+    '''
+    suit = None
+    rank = None
+    valid_suit = ['S', 'H', 'D', 'C']
+    valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'] # only 'T' to 'A' are used
+
+    def __init__(self, suit, rank):
+        ''' Initialize the suit and rank of a card
+
+        Args:
+            suit: string, suit of the card, should be one of valid_suit
+            rank: string, rank of the card, should be one of valid_rank
+        '''
+        self.suit = suit
+        self.rank = rank
+
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return self.rank == other.rank and self.suit == other.suit
+        else:
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+    def __hash__(self):
+        suit_index = Card.valid_suit.index(self.suit)
+        rank_index = Card.valid_rank.index(self.rank)
+        return rank_index + 100 * suit_index
+
+    def __str__(self):
+        ''' Get string representation of a card.
+
+        Returns:
+            string: the combination of rank and suit of a card. Eg: AS, 5H, JD, 3C, ...
+        '''
+        return self.rank + self.suit
+
+    def get_index(self):
+        ''' Get index of a card.
+
+        Returns:
+            string: the combination of suit and rank of a card. Eg: 1S, 2H, AD, BJ, RJ...
+        '''
+        return self.suit+self.rank
+    
+    def rank_to_index(self):
+        ''' Get the corresponding number of a rank.
+
+        Args:
+            rank(str): rank stored in Card object
+
+        Returns:
+            (int): the number corresponding to the rank
+
+        Note:
+            1. If the input rank is an empty string, the function will return -1.
+            2. If the input rank is not valid, the function will return None.
+        '''
+        if self.rank == '':
+            return -1
+        elif self.rank.isdigit():
+            if int(self.rank) >= 2 and int(self.rank) <= 10:
+                return int(self.rank)
+            else:
+                return None
+        elif self.rank == 'A':
+            return 14
+        elif self.rank == 'T':
+            return 10
+        elif self.rank == 'J':
+            return 11
+        elif self.rank == 'Q':
+            return 12
+        elif self.rank == 'K':
+            return 13
+        return None
+    
+    @staticmethod
+    def print_card(cards):
+        ''' Nicely print a card or list of cards
+
+        Args:
+            card (string or list): The card(s) to be printed
+        '''
+        if cards is None:
+            cards = [None]
+        if isinstance(cards, str):
+            cards = [cards]
+
+        lines = [[] for _ in range(9)]
+        for card in cards:
+            if card is None:
+                lines[0].append('┌─────────┐')
+                lines[1].append('│░░░░░░░░░│')
+                lines[2].append('│░░░░░░░░░│')
+                lines[3].append('│░░░░░░░░░│')
+                lines[4].append('│░░░░░░░░░│')
+                lines[5].append('│░░░░░░░░░│')
+                lines[6].append('│░░░░░░░░░│')
+                lines[7].append('│░░░░░░░░░│')
+                lines[8].append('└─────────┘')
+            else:
+                if isinstance(card, Card):
+                    elegant_card = Card.elegant_form(card.suit + card.rank)
+                else:
+                    elegant_card = Card.elegant_form(card)
+                suit = elegant_card[0]
+                rank = elegant_card[1]
+                if len(elegant_card) == 3:
+                    space = elegant_card[2]
+                else:
+                    space = ' '
+
+                lines[0].append('┌─────────┐')
+                lines[1].append('│{}{}       │'.format(rank, space))
+                lines[2].append('│         │')
+                lines[3].append('│         │')
+                lines[4].append('│    {}    │'.format(suit))
+                lines[5].append('│         │')
+                lines[6].append('│         │')
+                lines[7].append('│       {}{}│'.format(space, rank))
+                lines[8].append('└─────────┘')
+
+        for line in lines:
+            print ('   '.join(line))
+
+    @staticmethod
+    def elegant_form(card):
+        ''' Get a elegant form of a card string
+
+        Args:
+            card (string): A card string
+
+        Returns:
+            elegant_card (string): A nice form of card
+        '''
+        suits = {'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣','s': '♠', 'h': '♥', 'd': '♦', 'c': '♣' }
+        rank = 'T' if card[1] == '10' else card[1]
+
+        return suits[card[0]] + rank

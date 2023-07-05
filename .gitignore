@@ -131,7 +131,6 @@ dmypy.json
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
 *.lot
 *.fls
 *.out
@@ -408,3 +407,6 @@ TSWLatexianTemp*
 # Custom
 .vscode
 */latex/figures
+*test.py
+*.json
+*TO_BE_DELETED

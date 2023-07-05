@@ -1,0 +1,305 @@
+\typeout{}
+\typeout{--------------------------------------------------------------}
+\typeout{ +---+ Article Tempate                             }
+\typeout{ +---+      Version 2.0, August 2011                         }
+\typeout{ +---+  for Instituto Superior Tecnico (IST),                 }
+\typeout{ +---+  Universidade Tï¿½nica de Lisboa                         }
+\typeout{ * Modified from J. Seixas original template                                }
+\typeout{ * Created to write Master Thesis Articles                             }
+\typeout{ * Conforms with IST Master Degree format                     }
+\typeout{ AUTHOR: Miguel Amador                                          }
+\typeout{--------------------------------------------------------------}
+\typeout{}
+
+%% Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[iso-8859-7]{inputenc}
+\usepackage[OT1]{fontenc}
+%\usepackage{lmodern} %Type1-font for non-english texts and characters
+\usepackage[greek,english]{babel} %francais, polish, spanish, ...
+\usepackage{csquotes}
+
+\newcommand{\gr}{\selectlanguage{greek}}
+\newcommand{\en}{\selectlanguage{english}}
+
+\raggedbottom
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+% PACKAGE graphics, epsfig, subfigure, caption:
+% ---------------------------------------------
+% Packages for figures... well you will certainly need these packages, with the exception
+% of the 'caption' package. This only allows to define extra caption options.
+% Notice that subfigure allows to place figures within figures with its own caption. It
+% should be avoided to create an eps file with subfigures. That will mean that you won't be 
+% able to reference those subfigures. Instead create an EPS file (the only graphics format supported
+% by latex) for each of the subfigures and then use the command \subfigure (see below).
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{epsfig}
+%\usepackage[hang,footnotesize,bf]{subfigure}
+%\usepackage{tikz} %%Generate vector graphics from within LaTeX
+\usepackage{xcolor}
+\usepackage{calc}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage[font=footnotesize,labelfont=bf,textfont=normalfont]{caption}
+\usepackage{float}
+\usepackage{eurosym}
+\usepackage{verbatim}
+
+
+\graphicspath{{Figures/}} %Definition of Figures Path
+
+% PACKAGE latexsym:
+% -----------------
+% Defines additional latex symbols. May be required for thesis with many math symbols.
+\usepackage{latexsym}
+
+% PACKAGE amsmath, amsthm, amssymb, amsfonts:
+% -------------------------------------------
+% This package is typically required. Among many other things it adds the possibility
+% to put symbols in bold by using \boldsymbol (not \mathbf); defines additional 
+% fonts and symbols; adds the \eqref command for citing equations. I prefer the style
+% "(x.xx)" for referering to an equation than to use "equation x.xx".
+\usepackage{amsmath, amsthm, amssymb, amsfonts, amsbsy,amssymb}
+
+
+%Additional packages by Michail Pantourakis, 2016
+% PACKAGE algorithmic, algorithm
+% ------------------------------
+% These packages are required if you need to describe an algorithm.
+%% \usepackage{algorithmic}
+% \usepackage[chapter]{algorithm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{float}
+\usepackage[caption = false]{subfig}
+
+\usepackage{makecell}
+
+\usepackage{cancel}
+
+\usepackage{matlab-prettifier}
+
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+% PACKAGE natbib/cite
+% -------------------
+% The two packages are not compatible, and you should use one of the two. Notice however that the
+% IEEE BiBTeX stylesheet is imcompatible with the natbib package. If using the IEEE format, use the 
+% cite package instead
+%\usepackage[square,numbers,sort&compress]{natbib}
+%\usepackage{cite}
+\usepackage[backend=biber,
+autolang=other,
+sorting=none,
+style=numeric-comp,
+maxcitenames=2,
+maxbibnames=99,
+giveninits=true,
+natbib=true]{biblatex}
+\addbibresource[]{02.biblio.bib}
+
+%\DefineBibliographyStrings{greek}{%
+%andothers = {et\ al\adddot\nopunct},
+%}
+
+\DefineBibliographyStrings{greek}{%
+andothers = {êáé\ Üëëïé},
+}
+
+\DefineBibliographyStrings{greek}{%
+and = {êáé}, 
+}
+
+\DefineBibliographyStrings{greek}{%
+in = {óå}, 
+}
+
+\DefineBibliographyStrings{greek}{%
+pages = {óåë.}, 
+}
+
+% PACKAGE multirow, colortbl, longtable:
+% ---------------------------------------
+% These packages are most usefull for advanced tables. The first allows to join rows 
+% throuhg the command \multirow which works similarly with the command \multicolumn
+% The second package allows to color the table (both foreground and background)
+% The third package is only required when tables extend beyond the length of one page;
+% which typically does not happen and should be avoided
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{colortbl}
+\usepackage{longtable} %%For tables, that exceed one page
+\setlength\columnsep{12pt}
+
+\setlength{\belowcaptionskip}{-10pt}
+
+\setlength{\abovecaptionskip}{6pt}
+
+%% Line Spacing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\baselinestretch}{1.5}
+\usepackage{setspace}
+%\singlespacing        %% 1-spacing (default)
+%\onehalfspacing       %% 1,5-spacing
+%\doublespacing        %% 2-spacing
+
+
+% PACKAGE acronyum
+% -----------------
+% This package is most useful for acronyms. The package guarantees that all acronyms definitions are 
+% given at the first usage. IMPORTANT: do not use acronyms in titles/captions; otherwise the definition 
+% will appear on the table of contents.
+\usepackage[printonlyused]{acronym}
+\usepackage[titletoc,title,header]{appendix}
+\usepackage[noauto]{chappg}
+
+%% Other Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{a4wide} %%Smaller margins = more text per page.
+\usepackage{fancyhdr} %%Fancy headings
+\usepackage{geometry}
+\usepackage{forarray}
+\usepackage{array}
+\usepackage{indentfirst}
+\usepackage{url}
+%\usepackage{hyperref}
+\usepackage{fancyvrb}
+% PACKAGE hyperref
+% -----------------
+% Set links for references and citations in document
+% Some MiKTeX distributions have faulty PDF creators in which case this package will not work correctly
+% Long live Linux :D
+\usepackage[plainpages=false]{hyperref}
+
+
+
+
+\usepackage{tikz}
+% You also need to specify which TikZ libraries you use
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations.pathmorphing,decorations.markings}
+\usetikzlibrary{shapes}
+\usetikzlibrary{patterns}
+\usetikzlibrary{chains}
+
+
+\usetikzlibrary{scopes}
+\usetikzlibrary{matrix}
+\makeatletter
+\tikzset{join/.code=\tikzset{after node path={%
+\ifx\tikzchainprevious\pgfutil@empty\else(\tikzchainprevious)%
+edge[every join]#1(\tikzchaincurrent)\fi}}}
+\makeatother
+%
+\tikzset{>=stealth',every on chain/.append style={join},
+         every join/.style={->}}
+\tikzstyle{labeled}=[execute at begin node=$\scriptstyle,
+   execute at end node=$]
+
+\usepackage{textcomp}       % additional symbols using companion encoding TS1
+\usepackage{gensymb}        % provides macro \degree which works in text and math
+\usepackage{notoccite}	  % does not start numbering from references in figures, tables, etc.
+\usepackage{circuitikz}
+
+%\usepackage[font={small,it}]{caption} % changes font of captions
+
+%\usepackage{amssymb}
+%\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+%\usepackage{amsmath}
+%\usepackage{fixltx2e}
+%
+\usepackage{fancyhdr, blindtext} % header
+
+\usepackage[compact]{titlesec}
+
+% Package better alternative to verbatim
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{%
+  language=[LaTeX]TeX,
+  backgroundcolor=\color{gray!10},
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  columns=fullflexible,
+  numbers=left
+}
+
+% facilitates the creation of memory maps. Start address at the bottom, end address at the top.
+% syntax: \memsection{end address}{start address}{height in lines}{text in box}
+
+\usepackage{bytefield}
+\newcommand{\memsection}[4]{
+\bytefieldsetup{bitheight=#3\baselineskip}    % define the height of the memsection
+\bitbox[]{10}{
+\texttt{#1}     % print end address
+\\ \vspace{#3\baselineskip} \vspace{-2\baselineskip} \vspace{-#3pt} % do some spacing
+\texttt{#2} % print start address
+}
+\bitbox{16}{#4} % print box with caption
+}
+
+\batchmode
+
+
+%% Defenitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\textwidth 16cm
+%\textheight 21cm
+\geometry{top=3cm, bottom=2cm, left=2cm, right=2cm} %Definiï¿½ï¿½o das margens
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Cabeï¿½alhos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\pagestyle{fancy} %Para introduzir cabeï¿½alhos e rodapï¿½s
+%
+%%Primeira Pï¿½gina
+%
+%\fancypagestyle{primeira.pag}{%
+%\fancyhead{}
+%\headheight 1.5cm
+%\fancyhf{} % clear all header and footer fields
+%\rhead{\footnotesize Subject\\ Course\\Yï¿½ Ano, Xï¿½ Semestre 2010/2011} %Cabeï¿½alho alinhado ï¿½ direita (\\ para mudar de linha)
+%\fancyfoot[C]{\large \thepage} % except the center
+%\renewcommand{\headrulewidth}{0pt} %Sem linha no cabeï¿½alho
+%\renewcommand{\footrulewidth}{0.4pt}} %Com linha rodapï¿½
+%
+%
+%
+%%Restantes pï¿½ginas
+%
+%\fancypagestyle{outras.pag}{%
+%\fancyhead{}
+%\headheight 30pt
+%\lhead{\normalsize Article Name}
+%\rhead{\normalsize Authors} %Cabeï¿½alho alinhado ï¿½ direita
+%\fancyfoot[C]{\large \thepage} % except the center
+%\renewcommand{\footrulewidth}{0.4pt} %Linha do rodapï¿½
+%\renewcommand{\headrulewidth}{0.4pt}} %Linha do cabeï¿½alho
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% User Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Simple References
+\newcommand{\figref}[1]{Figure \ref{#1}}
+\newcommand{\equationref}[1]{Equation (\ref{#1})}
+\newcommand{\tableref}[1]{Table (\ref{#1})}
+
+%Integral
+\newcommand{\infinityint}[1]{\int_{-\infty}^{\infty}#1}
+
+%% Define a new 'leo' style for the package that will use a smaller font.
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\rm}}{\def\UrlFont{\large\rmfamily}}}
+\makeatother
+%% Now actually use the newly defined style.
+\urlstyle{leo}
