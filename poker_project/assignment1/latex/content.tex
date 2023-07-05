@@ -12,13 +12,14 @@ Both ``exact'' algorithms are limited in solving problems with a relatively smal
 
 First of all, a dumped-down version of heads-up limit Texas hold'em is used as a basis, thus only 2 players participate. Both players start with a card in hand (not the normal of 2 cards) and with betting the same mandatory amount of 0.5 tokens (namely no small/big ``blind'' difference). 
 
-The game continues with a bidding round. Since this is a limit variant, either 1 (actions ``bet'' or ''raise'') or 0 (actions ``check'' or ``fold'') tokens can be placed by a player per turn of action, with a maximum of 2 tokens placed in total by each player per round. If a player folds, the other player is an instant winner and is rewarded with the full amount of tokens bet so far. Otherwise, 2 cards are further drawn and are publicly revealed, and a second bidding round, similar to the first one, begins. Unlike the real game, the order (position) of players in which they are required to take action remains the same for both rounds. For simplicity, no further rounds and card draws take place. Table \ref{table:legal-actions} summarizes the legal order of actions in all game states.
+The game continues with a bidding round. Since this is a limit variant, either 1 (actions ``bet'' or ''raise'') or 0 (actions ``check'' or ``fold'') tokens can be placed by a player per turn of action, with a maximum of 2 tokens placed in total by each player per round. If a player folds, the other player is an instant winner and is rewarded with the full amount of tokens bet so far. Otherwise, 2 cards are further drawn and are publicly revealed, and a second bidding round, similar to the first one, begins. Unlike the real game, the order (position) of players in which they are required to take action remains the same for both rounds. For simplicity, no further rounds and card draws take place. Table \ref{table:actions}(a) summarizes the legal order of actions in all game states.
 
 Assuming no player has folded until the end of round two, the winner is then decided by comparing their ``hand strength''. To reduce the number of possible combinations, only cards with rank `T', `J', `Q', `K', `A' (in ascending order) are available in deck (20 cards in total, 4 suits per rank). This simplification leaves only three winning combinations of hand and public cards: 1) 3 cards of the same kind (rank), 2) a pair of same kind, 3) no pairs. The rank of the pair or hand is used as a tie-breaker in rules (2) and (3). If all tie-breakers fail, the result is a tie and the tokens placed by both players are returned to them.
 
 \begin{table}[htpb]
 \centering
-\begin{tabular}{ |c|c|c| }
+\resizebox{\linewidth}{!}{%
+\subfloat[]{\begin{tabular}{ |c|c|c| }
 \hline
 position & opponent chip difference & legal actions\\
 \hline
@@ -31,25 +32,11 @@ second & 0 & check, raise \\
 \hline
 second & 1 & bet, fold, raise \\
 \hline
-\end{tabular}
-\caption{Legal actions of players according to their position and difference between opponent's and player's chips.}
-\label{table:legal-actions}
-\end{table}
-
-\subsection{Opponents as part of the environment}
-\label{sec:opponents}
-
-Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q-learning.
-
-The first opponent, hereafter called \textit{Random agent}, is a completely randomized agent. Each time an action is required by it, it randomly picks -with equal probability- one of the actions allowed according to the game's current phase. Since the Random agent disregards any other card and opponent information, its opponent cannot infer any meaningful information from its actions.
-
-The second opponent, named \textit{Threshold agent}, is a completely deterministic agent, using only the strengths of its cards to determine its next action. Table \ref{table:threshold-actions} summarizes the action this agent will perform at any possible step. In contrast to the Random agent, each and every action of the Threshold agent provides information on the range of possible ranks held in its hand. Therefore, its predictable nature can be used against it by any agent trained on it.
-
-\begin{table}[htpb]
-\centering
-\begin{tabular}{ |c|c|c|c| }
+\end{tabular}}
+\quad
+\subfloat[]{\begin{tabular}{ |c|c|c|c| }
 \hline
-round & hand strength & action priority\\
+round & hand strength & Threshold action priority\\
 \hline
 \hline
 1 & A, K & 1. raise, 2. bet \\
@@ -64,11 +51,20 @@ round & hand strength & action priority\\
 \hline
 2 & J, T (no pair) & 1. check, 2. fold \\
 \hline
-
-\end{tabular}
-\caption{The actions a Threshold agent selects at any possible state. If both actions shown are legal, the one with higher priority (lower number) will be selected.}
-\label{table:threshold-actions}
+\end{tabular}}
+}
+\caption{(a) Legal actions of players according to their position and difference between opponent's and player's chips. (b) The actions a Threshold agent selects at any possible state. If both actions shown are legal, the one with higher priority (lower number) will be selected.}
+\label{table:actions}
 \end{table}
+
+\subsection{Opponents as part of the environment}
+\label{sec:opponents}
+
+Two different types of ``static'' (non-adversarial) agents were created in this project. These opponents serve as both necessary components of the full state-space formulation required by Policy Iteration, and benchmarks for the performance of Q-learning.
+
+The first opponent, hereafter called \textit{Random agent}, is a completely randomized agent. Each time an action is required by it, it randomly picks -with equal probability- one of the actions allowed according to the game's current phase. Since the Random agent disregards any other card and opponent information, its opponent cannot infer any meaningful information from its actions.
+
+The second opponent, named \textit{Threshold agent}, is a completely deterministic agent, using only the strengths of its cards to determine its next action. Table \ref{table:actions}(b) summarizes the action this agent will perform at any possible step. In contrast to the Random agent, each and every action of the Threshold agent provides information on the range of possible ranks held in its hand. Therefore, its predictable nature can be used against it by any agent trained on it.
 
 \subsection{MDP and state/action space representation}
 \label{sec:state-space}
@@ -95,7 +91,7 @@ Prior to experimenting with a true learning algorithm in this game, we first wan
 
 \subsection{MDP implementation}
 
-As shown in Table \ref{table:state-space}, a state is fully characterized by six features. Since my primary goal was to enhance readability of my implementation and results, I sacrificed memory usage efficiency by selecting a descriptive state representation using Python's dictionaries over lists. In particular, a two-level nested dictionary structure was formed, with state being the first level key, action being the second level key, and each state-action pair containing a list of all possible transitions (which are as described in Section \ref{sec:state-space}). Following Table \ref{table:state-space}, the syntax of state keys is {\small \Verb|{{position}}_{{my_chips}}_{{opponent_chips}}_{{hand}}_{{public_cards}}_{{opponent_range}}|}, \\ while the action values of Table \ref{table:legal-actions} were directly used as action keys.
+As shown in Table \ref{table:state-space}, a state is fully characterized by six features. Since my primary goal was to enhance readability of my implementation and results, I sacrificed memory usage efficiency by selecting a descriptive state representation using Python's dictionaries over lists. In particular, a two-level nested dictionary structure was formed, with state being the first level key, action being the second level key, and each state-action pair containing a list of all possible transitions (which are as described in Section \ref{sec:state-space}). Following Table \ref{table:state-space}, the syntax of state keys is {\small \Verb|{{position}}_{{my_chips}}_{{opponent_chips}}_{{hand}}_{{public_cards}}_{{opponent_range}}|}, \\ while the action values in Tables \ref{table:actions} were directly used as action keys.
 
 Since transition probabilities are entirely determined by 1) opponent action probabilities (opponent model), and 2) poker card probabilities (game rules), I needed to implement a way of calculating these odds for the unique poker variant of this project. Since the former is part of the game and irrespective of opponent models, I developed the function \Verb|get_transition_probabilities_for_cards()| in the Game class. This function returned a dictionary containing the odds of each card pairs (as ranks) being drawn in flop knowing our hand and our opponent's range (resulting file \Verb|win_probabilities.json|). Now given the public cards as well, this method also provides the odds of winning (file \\ \Verb|win_probabilities.json|) and losing (file \Verb|loss_probabilities.json|), with tie odds also being trivially calculated. Finally, resulting file \Verb|range_probabilities.json| includes the odds of the opponent having a certain card range given their current range and all other revealed cards.
 
