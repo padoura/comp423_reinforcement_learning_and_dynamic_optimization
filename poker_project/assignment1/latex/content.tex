@@ -105,7 +105,7 @@ In regards to opponent action probabilities, these of course differ between Rand
 
 For the development of Policy Iteration agent, I adapted the example for the Frozen Lake environment provided in class. Most of the provided implementation remained unchanged, however since I decided to use dictionaries for the representation of state-action-transitions, I had to replace the functionality meant for tabular representations with an equivalent for dictionaries.
 
-Policy Iteration offers a pair of hyperparameters: 1) the convergence error, and 2) the discount factor $\gamma$. My chosen values for both hyperparameters was supported by the episodic nature of limit poker, since all games terminate after a very limited number of state transitions. Therefore, for convergence error I chose the default low value of $10^{-10}$ (since fast convergence is expected). Furthermore, I also defaulted $\gamma=1$. Choosing a lower value for $\gamma$ in poker is expected to motivate a more aggressive gameplay, trying to winning games as fast as possible by forcing opponents to fold. However, I did not go that route since 1) rewards are equally important regardless of how many steps a game lasted, and 2) longer lasting games may offer more opportunities for increased rewards, especially against simple opponents that have a high chance of choosing subpar actions.
+Policy Iteration offers a pair of hyperparameters: 1) the convergence error $\delta$, and 2) the discount factor $\gamma$. My chosen values for both hyperparameters was supported by the episodic nature of limit poker, since all games terminate after a very limited number of state transitions. Therefore, for convergence error I chose the default low value of $10^{-10}$ (since fast convergence is expected). Furthermore, I also defaulted $\gamma=1$. Choosing a lower value for $\gamma$ in poker is expected to motivate a more aggressive gameplay, trying to winning games as fast as possible by forcing opponents to fold. However, I did not go that route since 1) rewards are equally important regardless of how many steps a game lasted, and 2) longer lasting games may offer more opportunities for increased rewards, especially against simple opponents that have a high chance of choosing subpar actions.
 
 \subsection{Results}
 
@@ -212,6 +212,60 @@ rank of remaining possible opposing player cards in hand in alphabetical order &
 }
 \caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
 \label{table:state-space}
+\end{table}
+
+\begin{table}[htpb]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{ |c|c|c|c| }
+\hline
+agent & hyperparameters &average reward & standard deviation\\
+\hline
+\hline
+Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.8761 & 2.127\\
+\hline
+Threshold & - & 0.3094 & 1.643\\
+\hline
+q\_base & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8670 & 2.121\\
+\hline
+q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/4$, $\alpha_d=-1/8$ & 0.4862 & 1.655\\
+\hline
+q\_lower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8329 & 2.103\\
+\hline
+q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.8733 & 2.128\\
+\hline
+q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.8739 & 2.128\\
+\hline
+\end{tabular}
+}
+\caption{Testing performance of various agents against Random agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
+\label{table:random-results}
+\end{table}
+
+\begin{table}[htpb]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{ |c|c|c|c| }
+\hline
+agent & hyperparameters &average reward & standard deviation\\
+\hline
+\hline
+Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.2252 & 1.467\\
+\hline
+q\_base & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1623 & 1.246\\
+\hline
+q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/8$ & 0.1491 & 1.149\\
+\hline
+q\_bigger\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1460 & 1.100\\
+\hline
+q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.1549 & 1.351\\
+\hline
+q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.1553 & 1.212\\
+\hline
+\end{tabular}
+}
+\caption{Testing performance of various agents against Threshold agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
+\label{table:threshold-results}
 \end{table}
 
 
