@@ -109,6 +109,34 @@ In the following subsections I present the results of these experiments against 
 
 Seeing the test results of all different agents against a Random opponent (Table \ref{table:random-results}), we can clearly confirm the theoretical ability of Q-learning to converge (in the limit) to the optimal policy. More specifically, allowing more exploration with $\epsilon$-greedy (with higher initial value and slower decay rate), Q-learning achieved almost the same reward distributions as with Policy Iteration. On the contrary, slowing down the decay of learning rate $\alpha$, without a similar decrease for $\epsilon$, significantly deteriorated performance. This effect of high learning rates is well-known, since they tend to introduce instability, preventing rapid convergence to the optimal solutions.
 
+\begin{table}[htpb]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{ |c|c|c|c| }
+\hline
+agent & hyperparameters &average reward & standard deviation\\
+\hline
+\hline
+Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.8761 & 2.127\\
+\hline
+Threshold & - & 0.3094 & 1.643\\
+\hline
+q\_base & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8670 & 2.121\\
+\hline
+q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/4$, $\alpha_d=-1/8$ & 0.4862 & 1.655\\
+\hline
+q\_lower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8329 & 2.103\\
+\hline
+q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.8733 & 2.128\\
+\hline
+q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.8739 & 2.128\\
+\hline
+\end{tabular}
+}
+\caption{Testing performance of various agents against Random agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
+\label{table:random-results}
+\end{table}
+
 One way to analyze the speed of this algorithm's convergence is to inspect the flattening of the average rewards curve while training (Figure \ref{fig:1}(a)). Apart from the unstable case of large learning rate values, we can see that the linear part of the curve ends pretty fast, even before reaching $5\cdot10^5$ game episodes. 
 
 Since the effect of $\epsilon$-greedy exploration does not allow us to understand whether these training sessions converge to optimal or suboptimal policies, I also introduced another way of convergence rate analysis by directly comparing the similarity of the Q-learning policy with the optimal policy returned by Policy Iteration (Figure \ref{fig:1}(c)). The superior hyperparameter configurations of the test results also become obvious here, since they are the ones reaching the highest attained similarity levels ($>$95\%), while speed of convergence is also reconfirmed (90\% reached with less than $5\cdot10^5$ games). Note that a few differences in policies obtained by Q-learning may be expected, since there are states where different actions are simultaneously optimal.
@@ -119,9 +147,33 @@ Similar to Policy Iteration, dealing with the Threshold opponent case was more c
 
 Interestingly, inspecting the test results of Q-learning against a Threshold opponent (Table \ref{table:threshold-results}) reveals that this method could never reach the optimized rewards achieved by Policy Iteration, with the best configuration resulting in a mean value of 0.1623 tokens per game (compared to 0.2252 of Policy Iteration). As already mentioned, Q-learning is expected to converge (in the limit) to the optimal policy. Although this result may seem contradictory to theory, it can be argued that either this is indeed the optimal policy when using the reduced state space instead of the specialized one for Threshold opponents, or more training games (and better hyperparameter configuration) is required to achieve the true optimal.
 
-Finally, in regards to hyperparameter tuning, we can see that extending $\epsilon$-greedy exploration actually decreased average rewards in testing phase. Furthermore, using large learning rates, even briefly at early episodes (unlike Random opponents), was enough to yield worse testing performance. Figure \ref{fig:1}(b) shows the trend followed by one training instance of each configuration. The three configurations that used larger learning rates appear to converge rapidly and prematurely ($<5\cdot10^5$ games), whereas the other two illustrated much slower convergence speed ($~10^6$ games).
+\begin{table}[htpb]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{ |c|c|c|c| }
+\hline
+agent & hyperparameters &average reward & standard deviation\\
+\hline
+\hline
+Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.2252 & 1.467\\
+\hline
+q\_base & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1623 & 1.246\\
+\hline
+q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/8$ & 0.1491 & 1.149\\
+\hline
+q\_bigger\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1460 & 1.100\\
+\hline
+q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.1549 & 1.351\\
+\hline
+q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.1553 & 1.212\\
+\hline
+\end{tabular}
+}
+\caption{Testing performance of various agents against Threshold agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
+\label{table:threshold-results}
+\end{table}
 
-generated suboptimal testing results appear to converge rapidly and prematurely. In contrast, the best Q-learning 
+Finally, in regards to hyperparameter tuning, we can see that extending $\epsilon$-greedy exploration actually decreased average rewards in testing phase. Furthermore, using large learning rates, even briefly at early episodes (unlike Random opponents), was enough to yield worse testing performance. Figure \ref{fig:1}(b) shows the trend followed by one training instance of each configuration. The three configurations that used larger learning rates appear to converge rapidly and prematurely ($<5\cdot10^5$ games), whereas the other two illustrated much slower convergence speed ($~10^6$ games).
 
 \section{Conclusion}
 
@@ -152,6 +204,39 @@ In summary, the \Verb|Card| class models each possible card of the game, while t
 As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script to try it out).
 
 To run games, the \Verb|Env| class brings together the \Verb|Game| and opposing agent objects, is responsible for invoking the \Verb|Game| functions and extracting the complete current state representation. Finally, file \Verb|seeding.py| contains random seeding utility functions offered by rlcard, while a few generic utility functions are implemented in file \Verb|utils.py|.
+
+\section{State space interpretation}
+\label{app:states}
+
+\begin{table}[htpb]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{ |p{0.2\linewidth}|p{0.2\linewidth}|p{0.3\linewidth}|p{0.3\linewidth}| }
+\hline
+Feature & Value Range & Necessity & Minimization\\
+\hline
+\hline
+position & `first', `second' & Playing first or second has a direct consequence on the list of legal actions, and in case of Threshold agent, on the inferred hand range. & Unlike real poker, the simplification of retaining the same position for round 2 (flop) reduces number of possible transitions. \\
+\hline
+chips placed so far by currently acting player & `0.5', `1.5', `2.5', `3.5' & Knowing how many chips are already committed by player directly contributes to eventual rewards/losses. & `4.5' is omitted since it is only encountered in game terminal states\\
+\hline
+difference in chips of opposing player & `-1', `0', `1' & Knowing how many chips are already committed by opposing player efficiently merges information about eventual rewards/losses and current player's legal actions. & Since this is a limit hold'em game, this enumeration is smaller than using `0.5', `1.5', `2.5', `3.5', `4.5' directly.\\
+\hline
+rank of card in hand of currently acting player & `T', `J', `Q', `K', `A' & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & `none' if not revealed yet, else all 10 combinations (e.g. `AK', `AJ', `JK' etc.) & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation. Furthermore, the order of public cards does not matter in this variant, hence the alphabetical order offers a consistent way of reducing the number of states.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & Based on Table \ref{table:threshold-actions}: `AJKQT' (no information), `JQT', all 10 combinations of public hands, and all ranks (when the opposing hand's rank is surely known) & Needed only for Threshold agent, the strength of the opposing hand directly affects the player's chances of winning if no player folds until the end of round 2, and it also determines the probability of the Threshold agent's next action & When the opposing agent is not known to be the Threshold agent, only `AJKQT' is used. See above too.\\
+\hline
+\end{tabular}
+}
+\caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
+\label{table:state-space}
+\end{table}
+
+\clearpage
+
+\section{Action space}
 
 \begin{table}[htpb]
 \centering
@@ -192,86 +277,6 @@ round & hand strength & Threshold action priority\\
 }
 \caption{(a) Legal actions of players according to their position and difference between opponent's and player's chips. (b) The actions a Threshold agent selects at any possible state. If both actions shown are legal, the one with higher priority (lower number) will be selected.}
 \label{table:actions}
-\end{table}
-
-\begin{table}[htpb]
-\centering
-\resizebox{0.9\linewidth}{!}{%
-\begin{tabular}{ |p{0.2\linewidth}|p{0.2\linewidth}|p{0.3\linewidth}|p{0.3\linewidth}| }
-\hline
-Feature & Value Range & Necessity & Minimization\\
-\hline
-\hline
-position & `first', `second' & Playing first or second has a direct consequence on the list of legal actions, and in case of Threshold agent, on the inferred hand range. & Unlike real poker, the simplification of retaining the same position for round 2 (flop) reduces number of possible transitions. \\
-\hline
-chips placed so far by currently acting player & `0.5', `1.5', `2.5', `3.5' & Knowing how many chips are already committed by player directly contributes to eventual rewards/losses. & `4.5' is omitted since it is only encountered in game terminal states\\
-\hline
-difference in chips of opposing player & `-1', `0', `1' & Knowing how many chips are already committed by opposing player efficiently merges information about eventual rewards/losses and current player's legal actions. & Since this is a limit hold'em game, this enumeration is smaller than using `0.5', `1.5', `2.5', `3.5', `4.5' directly.\\
-\hline
-rank of card in hand of currently acting player & `T', `J', `Q', `K', `A' & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation.\\
-\hline
-rank of remaining possible opposing player cards in hand in alphabetical order & `none' if not revealed yet, else all 10 combinations (e.g. `AK', `AJ', `JK' etc.) & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation. Furthermore, the order of public cards does not matter in this variant, hence the alphabetical order offers a consistent way of reducing the number of states.\\
-\hline
-rank of remaining possible opposing player cards in hand in alphabetical order & Based on Table \ref{table:threshold-actions}: `AJKQT' (no information), `JQT', all 10 combinations of public hands, and all ranks (when the opposing hand's rank is surely known) & Needed only for Threshold agent, the strength of the opposing hand directly affects the player's chances of winning if no player folds until the end of round 2, and it also determines the probability of the Threshold agent's next action & When the opposing agent is not known to be the Threshold agent, only `AJKQT' is used. See above too.\\
-\hline
-\end{tabular}
-}
-\caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
-\label{table:state-space}
-\end{table}
-
-\begin{table}[htpb]
-\centering
-\resizebox{0.9\linewidth}{!}{%
-\begin{tabular}{ |c|c|c|c| }
-\hline
-agent & hyperparameters &average reward & standard deviation\\
-\hline
-\hline
-Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.8761 & 2.127\\
-\hline
-Threshold & - & 0.3094 & 1.643\\
-\hline
-q\_base & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8670 & 2.121\\
-\hline
-q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/4$, $\alpha_d=-1/8$ & 0.4862 & 1.655\\
-\hline
-q\_lower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.8329 & 2.103\\
-\hline
-q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.8733 & 2.128\\
-\hline
-q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.8739 & 2.128\\
-\hline
-\end{tabular}
-}
-\caption{Testing performance of various agents against Random agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
-\label{table:random-results}
-\end{table}
-
-\begin{table}[htpb]
-\centering
-\resizebox{0.9\linewidth}{!}{%
-\begin{tabular}{ |c|c|c|c| }
-\hline
-agent & hyperparameters &average reward & standard deviation\\
-\hline
-\hline
-Policy Iteration & $\gamma=1$, $\delta=10^{-10}$ & 0.2252 & 1.467\\
-\hline
-q\_base & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1623 & 1.246\\
-\hline
-q\_slower\_alpha & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/8$, $\alpha_d=-1/8$ & 0.1491 & 1.149\\
-\hline
-q\_bigger\_alpha & $\epsilon_0=1$, $\alpha_0=1$, $\epsilon_d=-1/8$, $\alpha_d=-1/4$ & 0.1460 & 1.100\\
-\hline
-q\_slower\_epsilon & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/4$ & 0.1549 & 1.351\\
-\hline
-q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d=-1/8$ & 0.1553 & 1.212\\
-\hline
-\end{tabular}
-}
-\caption{Testing performance of various agents against Threshold agent. All experiments consisted of a total number of $5\cdot10^6$ games.}
-\label{table:threshold-results}
 \end{table}
 
 \end{appendices}
