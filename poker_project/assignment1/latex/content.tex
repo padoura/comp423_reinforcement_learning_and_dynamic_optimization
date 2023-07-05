@@ -155,16 +155,20 @@ In the following subsections I present the results of these experiments against 
 	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/moving_averages_random}}
 	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/moving_averages_threshold}}
 	\subfloat[]{\includegraphics[width=0.33\textwidth, angle =0, trim = 0mm 0mm 0mm 0mm,clip=true]{figures/convergence_rate}}
-\caption{Results of the first training instances per opponent and hyperparameter value set. (a)-(b) Moving average of payoffs (per $10^5$ games) against Random and Threshold agents respectively. (c) Similarity of policy returned by Q-learning compared to Policy Iteration, as a convergence rate indicator. Tables \ref{table:random-results}-\ref{table:threshold-results} show the values used for each legend entry.
+\caption{Results of the first training instances per opponent and hyperparameter value set. (a)-(b) Moving average of payoffs (per $10^5$ games) against Random and Threshold agents respectively. (c) Similarity of policy returned by Q-learning compared to Policy Iteration, as a convergence rate indicator. Tables \ref{table:random-results}-\ref{table:threshold-results} show the hyperparameter values used for each legend entry.
 }
 \label{fig:1}
 \end{figure}
 
 \subsubsection{Random opponent}
 
-\subsubsection{Threshold opponent}
+Seeing the test results of all different agents against a Random opponent (Table \ref{table:random-results}), we can clearly confirm the theoretical ability of Q-learning to converge (in the limit) to the optimal policy. More specifically, allowing more exploration with $\epsilon$-greedy (with higher initial value and slower decay rate), Q-learning achieved almost the same reward distributions as with Policy Iteration. On the contrary, slowing down the decay of learning rate $\alpha$, without a similar decrease for $\epsilon$, significantly deteriorated performance. This effect of high learning rates is well-known, since they tend to introduce instability, preventing rapid convergence to the optimal solutions.
 
-\subsection{Convergence analysis}
+One way to analyze the speed of this algorithm's convergence is to inspect the flattening of the average rewards curve while training (Figure \ref{fig:1}(a)). Apart from the unstable case of large learning rate values, we can see that the linear part of the curve ends pretty fast, even before reaching $5\cdot10^5$ game episodes. 
+
+Since the effect of $\epsilon$-greedy exploration does not allow us to understand whether these training sessions converge to optimal or suboptimal policies, I also introduced another way of convergence rate analysis by directly comparing the similarity of the Q-learning policy with the optimal policy returned by Policy Iteration (Figure \ref{fig:1}(c)). The superior hyperparameter configurations of the test results also become obvious here, since they are the ones reaching the highest attained similarity levels ($>$95\%), while speed of convergence is also reconfirmed (90\% reached with less than $5\cdot10^5$ games). Note that a few differences in policies obtained by Q-learning may be expected, since there are states where different actions are simultaneously optimal.
+
+\subsubsection{Threshold opponent}
 
 %\begin{itemize}
 %\item Implementation
