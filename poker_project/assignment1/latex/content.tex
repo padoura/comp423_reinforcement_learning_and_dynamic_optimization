@@ -77,30 +77,6 @@ Before proceeding with the implementation and results of this work, careful form
 
 Each state of the MDP is coupled with its legal actions only. Each state-action pair is then linked to one or more possible transitions. Each transition is in turn characterized by: 1) its conditional probability (given the state-action pair), 2) the next state, 3) the associated reward (which for a loss is negative), and 4) terminal status (as boolean). Note that in Texas Hold'em games, all intermediate states have 0 reward, and only terminal states may have non-zero values (and 0 only in case of ties).
 
-\begin{table}[htpb]
-\centering
-\begin{tabular}{ |p{0.2\linewidth}|p{0.2\linewidth}|p{0.25\linewidth}|p{0.25\linewidth}| }
-\hline
-Feature & Value Range & Necessity & Minimization\\
-\hline
-\hline
-position & `first', `second' & Playing first or second has a direct consequence on the list of legal actions, and in case of Threshold agent, on the inferred hand range. & Unlike real poker, the simplification of retaining the same position for round 2 (flop) reduces number of possible transitions. \\
-\hline
-chips placed so far by currently acting player & `0.5', `1.5', `2.5', `3.5' & Knowing how many chips are already committed by player directly contributes to eventual rewards/losses. & `4.5' is omitted since it is only encountered in game terminal states\\
-\hline
-difference in chips of opposing player & `-1', `0', `1' & Knowing how many chips are already committed by opposing player efficiently merges information about eventual rewards/losses and current player's legal actions. & Since this is a limit hold'em game, this enumeration is smaller than using `0.5', `1.5', `2.5', `3.5', `4.5' directly.\\
-\hline
-rank of card in hand of currently acting player & `T', `J', `Q', `K', `A' & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation.\\
-\hline
-rank of remaining possible opposing player cards in hand in alphabetical order & `none' if not revealed yet, else all 10 combinations (e.g. `AK', `AJ', `JK' etc.) & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation. Furthermore, the order of public cards does not matter in this variant, hence the alphabetical order offers a consistent way of reducing the number of states.\\
-\hline
-rank of remaining possible opposing player cards in hand in alphabetical order & Based on Table \ref{table:threshold-actions}: `AJKQT' (no information), `JQT', all 10 combinations of public hands, and all ranks (when the opposing hand's rank is surely known) & Needed only for Threshold agent, the strength of the opposing hand directly affects the player's chances of winning if no player folds until the end of round 2, and it also determines the probability of the Threshold agent's next action & When the opposing agent is not known to be the Threshold agent, only `AJKQT' is used. See above too.\\
-\hline
-\end{tabular}
-\caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
-\label{table:state-space}
-\end{table}
-
 \subsection{Implementation}
 
 The entirety of this project was implemented in Python. All simulations and results reported here can be reproduced by running the Jupyter Notebook file \Verb|notebook.ipynb|.
@@ -208,48 +184,35 @@ In the following subsections I present the results of these experiments against 
 \item Suggested next steps/improvements
 \end{itemize}
 
-%\begin{center}
-%\begin{tabular}{ |c|c|}
-%\hline
-%δυαδική αναπαράσταση & $m$\\
-%\hline
-%\hline
-%0000 & 0\\
-%\hline
-%1000 & 1\\
-%\hline
-%1100 & 2\\
-%\hline
-%1110 & 3\\
-%\hline
-%1111 & 4\\
-%\hline
-%0111 & 5\\
-%\hline
-%0011 & 6\\
-%\hline
-%0001 & 7\\
-%\hline
-%0101 & 8\\
-%\hline
-%1101 & 9\\
-%\hline
-%1001 & 10\\
-%\hline
-%1011 & 11\\
-%\hline
-%1010 & 12\\
-%\hline
-%0010 & 13\\
-%\hline
-%0110 & 14\\
-%\hline
-%0100 & 15\\
-%\hline
-%\end{tabular}
-%\end{center}
+\clearpage
 
+\section*{Appendix}
 
+\begin{table}[htpb]
+\centering
+\resizebox{0.9\linewidth}{!}{%
+\begin{tabular}{ |p{0.2\linewidth}|p{0.2\linewidth}|p{0.3\linewidth}|p{0.3\linewidth}| }
+\hline
+Feature & Value Range & Necessity & Minimization\\
+\hline
+\hline
+position & `first', `second' & Playing first or second has a direct consequence on the list of legal actions, and in case of Threshold agent, on the inferred hand range. & Unlike real poker, the simplification of retaining the same position for round 2 (flop) reduces number of possible transitions. \\
+\hline
+chips placed so far by currently acting player & `0.5', `1.5', `2.5', `3.5' & Knowing how many chips are already committed by player directly contributes to eventual rewards/losses. & `4.5' is omitted since it is only encountered in game terminal states\\
+\hline
+difference in chips of opposing player & `-1', `0', `1' & Knowing how many chips are already committed by opposing player efficiently merges information about eventual rewards/losses and current player's legal actions. & Since this is a limit hold'em game, this enumeration is smaller than using `0.5', `1.5', `2.5', `3.5', `4.5' directly.\\
+\hline
+rank of card in hand of currently acting player & `T', `J', `Q', `K', `A' & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & `none' if not revealed yet, else all 10 combinations (e.g. `AK', `AJ', `JK' etc.) & Strength of the card directly affects the player's chances of winning if no player folds until the end of round 2 & Suit does not matter at all in the simplified winning conditions of this game version, therefore it can be completely omitted from state-space representation. Furthermore, the order of public cards does not matter in this variant, hence the alphabetical order offers a consistent way of reducing the number of states.\\
+\hline
+rank of remaining possible opposing player cards in hand in alphabetical order & Based on Table \ref{table:threshold-actions}: `AJKQT' (no information), `JQT', all 10 combinations of public hands, and all ranks (when the opposing hand's rank is surely known) & Needed only for Threshold agent, the strength of the opposing hand directly affects the player's chances of winning if no player folds until the end of round 2, and it also determines the probability of the Threshold agent's next action & When the opposing agent is not known to be the Threshold agent, only `AJKQT' is used. See above too.\\
+\hline
+\end{tabular}
+}
+\caption{Simplified poker state-space representation utilized by Policy Iteration and Q-learning algorithms.}
+\label{table:state-space}
+\end{table}
 
 
 
