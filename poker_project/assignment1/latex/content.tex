@@ -137,7 +137,7 @@ In conclusion, as we will see in the following sections (and in Tables \ref{tabl
 
 \section{Model-free solution: Q-learning algorithm}
 
-++ intro
+Now that we have a much better understanding of the environment, we are ready to experiment with a true learning algorithm, Q-learning. Although this method still needs a finite state-action space to be defined, no MDP and prior knowledge of transitions are needed. Therefore, the opponent is initially unknown and Q-learning adapts its policy while playing against it. In the rest of this section, I start by shortly describing my implementation and hyperparameter configurations. Next, I present the experimental design and results to evaluate the performance of Q-learning, comparing both with the optimal policy from Policy Iteration and between different hyperparameter configurations.
 
 \subsection{Implementation}
 
@@ -145,7 +145,7 @@ For the purposes of this project I chose to implement the Q-learning algorithm s
 
 \subsection{Hyperparameter configuration}
 
-The implemented Q-learning algorithm has three hyperparameters: 1) the discount factor $\gamma$ (which I simply set to 1 for the same reasons I did for Policy Iteration), 2) the $\epsilon$ for $\e$-greedy state-action exploration, and 3) the learning rate $\alpha$. To guarantee convergence in the limit, I set both $\epsilon$ and $\alpha$ using an exponential decay function over the number of training episodes (games) $t>0$, as $\epsilon = \epsilon_0 t^{\epsilon_d}$ and $\alpha = \alpha_0 t^{\alpha_d}$, where $\epsilon_0$, $\alpha_0$ are the initial values (set for $t=0$ as well), and $\epsilon_d$, $\alpha_d$ are the corresponding decay rates. 
+The implemented Q-learning algorithm has three hyperparameters: 1) the discount factor $\gamma$ (which I simply set to 1 for the same reasons I did for Policy Iteration), 2) the $\epsilon$ for $\epsilon$-greedy state-action exploration, and 3) the learning rate $\alpha$. To guarantee convergence in the limit, I set both $\epsilon$ and $\alpha$ using an exponential decay function over the number of training episodes (games) $t>0$, as $\epsilon = \epsilon_0 t^{\epsilon_d}$ and $\alpha = \alpha_0 t^{\alpha_d}$, where $\epsilon_0$, $\alpha_0$ are the initial values (set for $t=0$ as well), and $\epsilon_d$, $\alpha_d$ are the corresponding decay rates. 
 
 \subsection{Results}
 
