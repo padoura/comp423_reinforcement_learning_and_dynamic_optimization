@@ -8,7 +8,7 @@ In this report I present my course project implementing these algorithms and ana
 
 \subsection{Simplified game rules}
 
-Both ``exact'' algorithms are limited in solving problems with a relatively small number of states and actions. As poker is characterized by numerous parameters (number of players, position/order of players, legal actions, bidding round number, betting chip/token allowance, hidden and public cards, winning card combinations), the state-space quickly has a large number of states. To alleviate this issue for the purposes of this project, a simplified version of the most popular poker variant, Texas hold'em was used. Since Texas hold'em is a well-known game and the simplified rules are also summarized in the project description, I will continue assuming this background is know. Interested readers can find a detailed description in Appendix.
+Both ``exact'' algorithms are limited in solving problems with a relatively small number of states and actions. As poker is characterized by numerous parameters (number of players, position/order of players, legal actions, bidding round number, betting chip/token allowance, hidden and public cards, winning card combinations), the state-space quickly has a large number of states. To alleviate this issue for the purposes of this project, a simplified version of the most popular poker variant, Texas hold'em was used. Since Texas hold'em is a well-known game and the simplified rules are also summarized in the project description, I will continue assuming this background is know. Interested readers can find a detailed description in Appendix \ref{app:rules}.
 
 \subsection{Opponents as part of the environment}
 \label{sec:opponents}
@@ -28,15 +28,7 @@ Each state of the MDP is coupled with its legal actions only. Each state-action 
 
 \subsection{Implementation}
 
-The entirety of this project was implemented in Python. All simulations and results reported here can be reproduced by running the Jupyter Notebook file \Verb|notebook.ipynb|.
-
-In regards to the environment implementation of this simple poker variant, I adapted the corresponding object-oriented game structure of the \href{https://rlcard.org/}{rlcard} Python library. Although this library may have already contained a functional environment for a number of poker games, this project's unique game rules demanded novel implementation of almost all classes.
-
-In summary, the \Verb|Card| class models each possible card of the game, while the \Verb|Dealer| is responsible for maintaining the deck and drawing cards. The \Verb|Judger| class contains the aforementioned rules of winning and is responsible for deciding the payoffs of each player (implemented as \Verb|Player| objects containing the state features known to each one). A \Verb|Round| object encapsulates all rules associated with player position, legal actions of currently active player, effects of selected actions, and round completion. The \Verb|Game| class is responsible for synchronizing all the aforementioned objects so that poker games can be executed as described.
-
-As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script to try it out).
-
-To run games, the \Verb|Env| class brings together the \Verb|Game| and opposing agent objects, is responsible for invoking the \Verb|Game| functions and extracting the complete current state representation. Finally, file \Verb|seeding.py| contains random seeding utility functions offered by rlcard, while a few generic utility functions are implemented in file \Verb|utils.py|.
+The entirety of this project was implemented in Python. All simulations and results reported here can be reproduced by running the Jupyter Notebook file \Verb|notebook.ipynb|. Refer to Appendix \ref{app:source} for a detailed description of the source code structure.
 
 \section{MDP-based solution: Policy Iteration algorithm}
 
@@ -137,9 +129,10 @@ This course project was an excellent introduction to the basic principles of Rei
 
 \clearpage
 
-\section*{Appendix}
+\begin{appendices}
 
-\subsection*{Simplified game rules}
+\section{Simplified game rules}
+\label{app:rules}
 
 Both ``exact'' algorithms are limited in solving problems with a relatively small number of states and actions. As poker is characterized by numerous parameters (number of players, position/order of players, legal actions, bidding round number, betting chip/token allowance, hidden and public cards, winning card combinations), the state-space quickly has a large number of states. To alleviate this issue for the purposes of this project, a simplified version of the most popular poker variant, Texas hold'em was used. Since Texas hold'em is a well-known game and its rules are also summarized in the project description, I will only provide a quick summary of its rules here, with emphasis on the unique deviations assumed here.
 
@@ -148,6 +141,17 @@ First of all, a dumped-down version of heads-up limit Texas hold'em is used as a
 The game continues with a bidding round. Since this is a limit variant, either 1 (actions ``bet'' or ''raise'') or 0 (actions ``check'' or ``fold'') tokens can be placed by a player per turn of action, with a maximum of 2 tokens placed in total by each player per round. If a player folds, the other player is an instant winner and is rewarded with the full amount of tokens bet so far. Otherwise, 2 cards are further drawn and are publicly revealed, and a second bidding round, similar to the first one, begins. Unlike the real game, the order (position) of players in which they are required to take action remains the same for both rounds. For simplicity, no further rounds and card draws take place. Table \ref{table:actions}(a) summarizes the legal order of actions in all game states.
 
 Assuming no player has folded until the end of round two, the winner is then decided by comparing their ``hand strength''. To reduce the number of possible combinations, only cards with rank `T', `J', `Q', `K', `A' (in ascending order) are available in deck (20 cards in total, 4 suits per rank). This simplification leaves only three winning combinations of hand and public cards: 1) 3 cards of the same kind (rank), 2) a pair of same kind, 3) no pairs. The rank of the pair or hand is used as a tie-breaker in rules (2) and (3). If all tie-breakers fail, the result is a tie and the tokens placed by both players are returned to them.
+
+\section{Source code implementation}
+\label{app:source}
+
+In regards to the environment implementation of this simple poker variant, I adapted the corresponding object-oriented game structure of the \href{https://rlcard.org/}{rlcard} Python library. Although this library may have already contained a functional environment for a number of poker games, this project's unique game rules demanded novel implementation of almost all classes.
+
+In summary, the \Verb|Card| class models each possible card of the game, while the \Verb|Dealer| is responsible for maintaining the deck and drawing cards. The \Verb|Judger| class contains the aforementioned rules of winning and is responsible for deciding the payoffs of each player (implemented as \Verb|Player| objects containing the state features known to each one). A \Verb|Round| object encapsulates all rules associated with player position, legal actions of currently active player, effects of selected actions, and round completion. The \Verb|Game| class is responsible for synchronizing all the aforementioned objects so that poker games can be executed as described.
+
+As far as player types are concerned, they are modeled as agent classes. The two static agent models described in Section \ref{sec:opponents} are implemented by the \Verb|RandomAgent| and \Verb|ThresholdAgent| classes. Moreover, the agent classes trained using the Policy Iteration and Q-learning algorithms include the implementation of these algorithms and are named \Verb|PolicyIterationAgent| and \Verb|QLearningAgent| respectively. As a way for a human player to test the environment and play against a computer-controlled agent, the \Verb|HumanAgent| class is also included (see file \Verb|play.py| for an example script to try it out).
+
+To run games, the \Verb|Env| class brings together the \Verb|Game| and opposing agent objects, is responsible for invoking the \Verb|Game| functions and extracting the complete current state representation. Finally, file \Verb|seeding.py| contains random seeding utility functions offered by rlcard, while a few generic utility functions are implemented in file \Verb|utils.py|.
 
 \begin{table}[htpb]
 \centering
@@ -270,7 +274,7 @@ q\_slower\_decay & $\epsilon_0=1$, $\alpha_0=0.1$, $\epsilon_d=-1/16$, $\alpha_d
 \label{table:threshold-results}
 \end{table}
 
-
+\end{appendices}
 
 
 
